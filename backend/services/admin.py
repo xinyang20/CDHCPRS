@@ -6,7 +6,8 @@ from fastapi import HTTPException, status
 from typing import List
 from models.user import User
 from models.conversation import Conversation
-from services.settings import update_multiple_settings
+from models.message import Message
+from services.settings import get_all_settings, update_multiple_settings
 
 
 def get_all_users(db: Session) -> List[User]:
@@ -105,6 +106,39 @@ def get_all_conversations(db: Session) -> List[Conversation]:
     return conversations
 
 
+def get_conversation_messages_by_admin(db: Session, conversation_id: int) -> List[Message]:
+    """
+    管理员获取指定对话的全部消息
+
+    Args:
+        db: 数据库会话
+        conversation_id: 对话 ID
+
+    Returns:
+        消息列表
+
+    Raises:
+        HTTPException: 对话不存在
+    """
+
+    conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+
+    if not conversation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="对话不存在",
+        )
+
+    messages = (
+        db.query(Message)
+        .filter(Message.conversation_id == conversation_id)
+        .order_by(Message.created_at.asc())
+        .all()
+    )
+
+    return messages
+
+
 def delete_conversation_by_admin(db: Session, conversation_id: int) -> None:
     """
     管理员删除对话
@@ -146,20 +180,22 @@ def update_system_settings_with_model_check(
     settings_dict: dict
 ) -> None:
     """
-    更新系统设置，如果模型配置改变则禁用所有对话
+    更新系统设置，如果模型配置发生变化则禁用所有对话
     
     Args:
         db: 数据库会话
         settings_dict: 设置字典
     """
-    # 检查是否更新了模型相关配置
-    model_keys = ["llm_provider", "llm_api_key", "llm_model_id"]
-    model_changed = any(key in settings_dict for key in model_keys)
-    
-    # 更新设置
+    model_keys = {"llm_provider", "llm_api_key", "llm_model_id", "llm_model_name", "llm_base_url"}
+    relevant_updates = {k: v for k, v in settings_dict.items() if k in model_keys and v is not None}
+    model_changed = False
+
+    if relevant_updates:
+        current_settings = get_all_settings(db)
+        model_changed = any(current_settings.get(k) != v for k, v in relevant_updates.items())
+
     update_multiple_settings(db, settings_dict)
-    
-    # 如果模型配置改变，禁用所有对话
+
     if model_changed:
         disable_all_conversations(db)
 

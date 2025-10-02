@@ -1,9 +1,9 @@
 <template>
-  <div class="register-container">
-    <el-card class="register-card">
+  <div class="auth-container">
+    <el-card class="auth-card">
       <template #header>
         <div class="card-header">
-          <h2>用户注册</h2>
+          <h2>{{ t('auth.register.title') }}</h2>
         </div>
       </template>
 
@@ -11,7 +11,7 @@
         <el-form-item prop="username">
           <el-input
             v-model="registerForm.username"
-            placeholder="请输入用户名（3-50个字符）"
+            :placeholder="t('auth.register.username')"
             prefix-icon="User"
             size="large"
           />
@@ -21,9 +21,10 @@
           <el-input
             v-model="registerForm.password"
             type="password"
-            placeholder="请输入密码（至少6个字符）"
+            :placeholder="t('auth.register.password')"
             prefix-icon="Lock"
             size="large"
+            @keyup.enter="handleRegister"
           />
         </el-form-item>
 
@@ -31,21 +32,21 @@
           <el-button
             type="primary"
             size="large"
-            style="width: 100%"
+            class="full-width"
             :loading="loading"
             @click="handleRegister"
           >
-            注册
+            {{ t('auth.register.submit') }}
           </el-button>
         </el-form-item>
 
         <el-form-item>
           <el-button
             size="large"
-            style="width: 100%"
+            class="full-width"
             @click="$router.push('/login')"
           >
-            返回登录
+            {{ t('auth.register.back') }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -54,13 +55,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { reactive, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
-import type { FormInstance, FormRules } from "element-plus";
+import type { FormInstance, FormItemRule, FormRules } from "element-plus";
 import { authAPI } from "../api/auth";
 
+const { t, locale } = useI18n();
 const router = useRouter();
+
 const formRef = ref<FormInstance>();
 const loading = ref(false);
 
@@ -71,37 +75,53 @@ const registerForm = reactive({
 
 const rules: FormRules = {
   username: [
-    { required: true, message: "请输入用户名", trigger: "blur" },
-    { min: 3, max: 50, message: "用户名长度为3-50个字符", trigger: "blur" },
+    { required: true, message: t("auth.register.usernameRequired"), trigger: "blur" },
+    { min: 3, max: 50, message: t("auth.register.usernameRule"), trigger: "blur" }
   ],
   password: [
-    { required: true, message: "请输入密码", trigger: "blur" },
-    { min: 6, max: 100, message: "密码长度至少6个字符", trigger: "blur" },
+    { required: true, message: t("auth.register.passwordRequired"), trigger: "blur" },
+    { min: 6, message: t("auth.register.passwordRule"), trigger: "blur" }
   ],
 };
+
+const toRuleArray = (rules: FormRules[string]): FormItemRule[] => {
+  if (!rules) return []
+  return Array.isArray(rules) ? [...rules] : [rules]
+}
+
+watch(locale, () => {
+  toRuleArray(rules.username).forEach((rule, index) => {
+    if (index === 0) rule.message = t('auth.register.usernameRequired');
+    if (index === 1) rule.message = t('auth.register.usernameRule');
+  });
+  toRuleArray(rules.password).forEach((rule, index) => {
+    if (index === 0) rule.message = t('auth.register.passwordRequired');
+    if (index === 1) rule.message = t('auth.register.passwordRule');
+  });
+});
 
 const handleRegister = async () => {
   if (!formRef.value) return;
 
   await formRef.value.validate(async (valid) => {
-    if (valid) {
-      loading.value = true;
-      try {
-        await authAPI.register(registerForm.username, registerForm.password);
-        ElMessage.success("注册成功，请登录");
-        router.push("/login");
-      } catch (error) {
-        console.error("注册失败:", error);
-      } finally {
-        loading.value = false;
-      }
+    if (!valid) return;
+    loading.value = true;
+    try {
+      await authAPI.register(registerForm.username, registerForm.password);
+      ElMessage.success(t("messages.registerSuccess"));
+      router.push("/login");
+    } catch (error) {
+      console.error("Registration failed:", error);
+      ElMessage.error(t("messages.registerFailed"));
+    } finally {
+      loading.value = false;
     }
   });
 };
 </script>
 
 <style scoped>
-.register-container {
+.auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -114,7 +134,7 @@ const handleRegister = async () => {
   );
 }
 
-.register-card {
+.auth-card {
   width: 100%;
   max-width: 420px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
@@ -129,6 +149,10 @@ const handleRegister = async () => {
   color: var(--color-primary);
   font-size: var(--font-size-2xl);
   font-weight: 600;
+}
+
+.full-width {
+  width: 100%;
 }
 
 :deep(.el-button) {

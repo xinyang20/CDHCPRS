@@ -1,17 +1,26 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { i18n } from '../i18n'
 
-const API_BASE_URL = 'http://127.0.0.1:8001'
+const DEFAULT_API_BASE_URL = 'http://127.0.0.1:8001'
+
+const getBaseUrl = () => {
+  const envUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
+  const raw = envUrl.trim()
+  const base = raw.length > 0 ? raw : DEFAULT_API_BASE_URL
+  return base.replace(/\/$/, '')
+}
+
+export const API_BASE_URL = getBaseUrl()
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 })
 
-// 请求拦截器 - 添加 token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -20,32 +29,25 @@ api.interceptors.request.use(
     }
     return config
   },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error),
 )
 
-// 响应拦截器 - 处理错误
 api.interceptors.response.use(
-  (response) => {
-    return response
-  },
+  (response) => response,
   (error) => {
     if (error.response) {
-      const message = error.response.data?.detail || '请求失败'
+      const message = error.response.data?.detail || i18n.global.t('messages.requestFailed')
       ElMessage.error(message)
-      
-      // 401 未授权，跳转登录
+
       if (error.response.status === 401) {
         localStorage.removeItem('token')
         window.location.href = '/login'
       }
     } else {
-      ElMessage.error('网络错误')
+      ElMessage.error(i18n.global.t('messages.networkError'))
     }
     return Promise.reject(error)
-  }
+  },
 )
 
 export default api
-

@@ -1,39 +1,118 @@
 import api from './index'
 
+export interface AdminUser {
+  id: number
+  username: string
+  role: string
+  is_banned: boolean
+  created_at: string
+}
+
+export interface ConversationSummary {
+  id: number
+  title: string
+  user_id: number
+  is_active: boolean
+  created_at: string
+}
+
+export interface ConversationMessage {
+  id: number
+  conversation_id: number
+  role: "user" | "assistant"
+  content: string
+  created_at: string
+}
+
+export interface AdminSettingsResponse {
+  website_name: string
+  website_logo: string
+  system_prompt: string
+  llm_provider: string
+  llm_base_url: string
+  llm_api_key: string
+  llm_model_id: string
+  llm_model_name: string
+}
+
+export interface AdminSettingsUpdatePayload {
+  website_name?: string
+  website_logo?: string
+  system_prompt?: string
+  llm_provider?: string
+  llm_base_url?: string
+  llm_api_key?: string
+  llm_model_id?: string
+  llm_model_name?: string
+}
+
+export interface TestConnectionPayload {
+  llm_provider: string
+  llm_api_key: string
+  llm_model_id?: string
+  llm_model_name?: string
+  llm_base_url?: string
+}
+
+export interface TestConnectionResult {
+  success: boolean
+  message: string
+}
+
+export interface LLMModelOption {
+  id: string
+  name?: string | null
+  owned_by?: string | null
+}
+
+export interface ModelListResponse {
+  models: LLMModelOption[]
+}
+
+export interface LogoUploadResponse {
+  logo_url: string
+}
+
 export const adminAPI = {
-  // 用户管理
-  getUsers: () => {
-    return api.get('/api/admin/users')
-  },
+  getUsers: () => api.get<AdminUser[]>('/api/admin/users'),
 
   updateUser: (userId: number, data: { is_banned?: boolean }) => {
-    return api.put(`/api/admin/users/${userId}`, data)
+    return api.put<AdminUser>(`/api/admin/users/${userId}`, data)
   },
 
-  deleteUser: (userId: number) => {
-    return api.delete(`/api/admin/users/${userId}`)
-  },
+  deleteUser: (userId: number) => api.delete(`/api/admin/users/${userId}`),
 
-  // 对话管理
-  getAllConversations: () => {
-    return api.get('/api/admin/conversations')
-  },
+  getAllConversations: () => api.get<ConversationSummary[]>('/api/admin/conversations'),
 
   deleteConversation: (conversationId: number) => {
     return api.delete(`/api/admin/conversations/${conversationId}`)
   },
 
-  // 系统设置
-  getSettings: () => {
-    return api.get('/api/admin/settings')
+  getConversationMessages: (conversationId: number) => {
+    return api.get<ConversationMessage[]>(`/api/admin/conversations/${conversationId}/messages`)
   },
 
-  updateSettings: (data: any) => {
-    return api.put('/api/admin/settings', data)
+  getSettings: () => api.get<AdminSettingsResponse>('/api/admin/settings'),
+
+  updateSettings: (data: AdminSettingsUpdatePayload) => {
+    return api.put<AdminSettingsResponse>('/api/admin/settings', data)
   },
 
-  testConnection: (data: { llm_provider: string; llm_api_key: string; llm_model_id: string }) => {
-    return api.post('/api/admin/settings/test-connection', data)
-  }
+  testConnection: (data: TestConnectionPayload) => {
+    return api.post<TestConnectionResult>('/api/admin/settings/test-connection', data)
+  },
+
+  fetchModels: (data: { llm_provider: string; llm_api_key: string; llm_base_url?: string }) => {
+    return api.post<ModelListResponse>('/api/admin/settings/models', data)
+  },
+
+  uploadLogo: (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post<LogoUploadResponse>('/api/admin/settings/upload-logo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
 }
-

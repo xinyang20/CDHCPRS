@@ -13,7 +13,7 @@ This system is a modern web application designed to provide intelligent healthca
 - **Traditional Chinese Design**: Adopts TCM traditional color scheme (#f0a04b) for an elegant user experience
 - **Intelligent Dialogue**: Real-time streaming conversation based on Large Language Models, with Markdown rendering and code highlighting
 - **Secure Authentication**: JWT token authentication with comprehensive permission control system
-- **Flexible Configuration**: Supports multiple LLM providers (DeepSeek, Qwen, OpenAI)
+- **Flexible Configuration**: Supports multiple LLM providers (DeepSeek, Qwen, OpenAI, OpenAIful) with automatic model list sync
 - **Management Backend**: Complete management features including user management, conversation management, and system settings
 - **Model Switching**: Supports dynamic LLM model switching with automatic conversation history handling
 

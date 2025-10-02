@@ -1,9 +1,6 @@
 <template>
   <div class="backend-status" :class="{ 'status-error': !isHealthy }">
-    <el-tooltip
-      :content="tooltipContent"
-      placement="top"
-    >
+    <el-tooltip :content="tooltipContent" placement="top">
       <div class="status-indicator">
         <div class="status-dot" :class="statusClass"></div>
         <span class="status-text">{{ statusText }}</span>
@@ -13,80 +10,78 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import api from "../api";
+
+const { t, locale } = useI18n();
 
 const isHealthy = ref(true);
 const lastCheckTime = ref<Date | null>(null);
 const checkInterval = ref<number | null>(null);
 const errorMessage = ref("");
 
-// 健康检查间隔（毫秒）
-const HEALTH_CHECK_INTERVAL = 30000; // 30秒
+const HEALTH_CHECK_INTERVAL = 30000;
 
-// 状态类名
 const statusClass = computed(() => {
   return isHealthy.value ? "status-healthy" : "status-unhealthy";
 });
 
-// 状态文本
 const statusText = computed(() => {
-  return isHealthy.value ? "后端正常" : "后端异常";
+  return isHealthy.value
+    ? t("statusMessages.backendHealthy")
+    : t("statusMessages.backendUnhealthy");
 });
 
-// 提示内容
 const tooltipContent = computed(() => {
   if (isHealthy.value) {
-    return lastCheckTime.value
-      ? `后端服务正常运行\n最后检查: ${lastCheckTime.value.toLocaleTimeString("zh-CN")}`
-      : "后端服务正常运行";
-  } else {
-    return errorMessage.value || "后端服务连接失败，请检查服务是否启动";
+    const last = lastCheckTime.value;
+    if (last) {
+      const time = last.toLocaleTimeString(locale.value);
+      return `${t("statusMessages.backendOkDetail")}` + `
+${t("statusMessages.lastCheck", { time })}`;
+    }
+    return t("statusMessages.backendOkDetail");
   }
+  return errorMessage.value || t("statusMessages.backendErrorDetail");
 });
 
-// 执行健康检查
 const checkHealth = async () => {
   try {
     const response = await api.get("/api/health", {
-      timeout: 5000, // 5秒超时
+      timeout: 5000,
     });
-    
+
     if (response.status === 200) {
       isHealthy.value = true;
       errorMessage.value = "";
     } else {
       isHealthy.value = false;
-      errorMessage.value = "后端服务响应异常";
+      errorMessage.value = t("statusMessages.backendErrorDetail");
     }
   } catch (error: any) {
     isHealthy.value = false;
     if (error.code === "ECONNABORTED") {
-      errorMessage.value = "后端服务响应超时";
+      errorMessage.value = t("statusMessages.backendErrorDetail");
     } else if (error.response) {
-      errorMessage.value = `后端服务错误: ${error.response.status}`;
+      errorMessage.value = `${t("statusMessages.backendErrorDetail")}: ${error.response.status}`;
     } else if (error.request) {
-      errorMessage.value = "无法连接到后端服务";
+      errorMessage.value = t("statusMessages.backendErrorDetail");
     } else {
-      errorMessage.value = "健康检查失败";
+      errorMessage.value = t("statusMessages.backendErrorDetail");
     }
   } finally {
     lastCheckTime.value = new Date();
   }
 };
 
-// 启动定期健康检查
 const startHealthCheck = () => {
-  // 立即执行一次检查
   checkHealth();
-  
-  // 设置定期检查
   checkInterval.value = window.setInterval(() => {
     checkHealth();
   }, HEALTH_CHECK_INTERVAL);
 };
 
-// 停止健康检查
 const stopHealthCheck = () => {
   if (checkInterval.value !== null) {
     clearInterval(checkInterval.value);
@@ -94,12 +89,10 @@ const stopHealthCheck = () => {
   }
 };
 
-// 组件挂载时启动健康检查
 onMounted(() => {
   startHealthCheck();
 });
 
-// 组件卸载时停止健康检查
 onUnmounted(() => {
   stopHealthCheck();
 });
@@ -192,22 +185,11 @@ onUnmounted(() => {
   color: var(--color-danger);
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .backend-status {
     bottom: var(--spacing-base);
     right: var(--spacing-base);
     padding: var(--spacing-xs) var(--spacing-sm);
   }
-
-  .status-text {
-    display: none;
-  }
-
-  .status-dot {
-    width: 12px;
-    height: 12px;
-  }
 }
 </style>
-

@@ -147,22 +147,31 @@ async def send_message(
     # 获取系统设置
     system_prompt = get_setting(db, "system_prompt") or "你是一位专业的中医医生。"
     llm_provider = get_setting(db, "llm_provider") or "deepseek"
-    llm_api_key = get_setting(db, "llm_api_key") or ""
-    llm_model_id = get_setting(db, "llm_model_id") or "deepseek-chat"
-    
+    llm_api_key = (get_setting(db, "llm_api_key") or "").strip()
+    llm_model_id = (get_setting(db, "llm_model_id") or "").strip()
+    llm_model_name = (get_setting(db, "llm_model_name") or "").strip()
+    llm_base_url = (get_setting(db, "llm_base_url") or "").strip()
+
     if not llm_api_key:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="系统未配置 LLM API Key，请联系管理员"
         )
-    
+
+    model_identifier = llm_model_id or llm_model_name or "deepseek-chat"
+    base_url = llm_base_url or None
+
     # 流式生成响应
     async def generate_response():
         full_response = ""
-        
+
         async for chunk in stream_llm_response(
-            llm_provider, llm_api_key, llm_model_id,
-            system_prompt, message_history
+            provider=llm_provider,
+            api_key=llm_api_key,
+            model=model_identifier,
+            system_prompt=system_prompt,
+            messages=message_history,
+            base_url=base_url,
         ):
             full_response += chunk
             yield chunk

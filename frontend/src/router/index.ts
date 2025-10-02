@@ -1,5 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
+import { ElMessage } from "element-plus";
+import { i18n } from "../i18n";
+
+import { authAPI } from "../api/auth";
+import { useUserStore } from "../stores/user";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -47,15 +52,34 @@ const router = createRouter({
   routes,
 });
 
-// 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
+  const userStore = useUserStore();
   const token = localStorage.getItem("token");
 
   if (to.meta.requiresAuth && !token) {
     next("/login");
-  } else {
-    next();
+    return;
   }
+
+  if (token && !userStore.user) {
+    try {
+      const { data } = await authAPI.getCurrentUser();
+      userStore.setUser(data);
+    } catch (error) {
+      console.error("Failed to hydrate user in router guard", error);
+      userStore.logout();
+      next("/login");
+      return;
+    }
+  }
+
+  if (to.meta.requiresAdmin && !userStore.isAdmin()) {
+    ElMessage.warning(i18n.global.t("messages.adminOnly"));
+    next("/chat");
+    return;
+  }
+
+  next();
 });
 
 export default router;

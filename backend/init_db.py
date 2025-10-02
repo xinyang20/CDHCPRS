@@ -48,6 +48,7 @@ def init_database():
             "website_logo": "",
             "system_prompt": "你是一位专业的中医医生，擅长诊断和治疗各种慢性病。请根据患者提供的信息，给出专业的诊疗建议。",
             "llm_provider": "deepseek",
+            "llm_base_url": "https://api.deepseek.com/v1",
             "llm_api_key": "",
             "llm_model_id": "deepseek-chat",
         }

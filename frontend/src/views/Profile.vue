@@ -1,51 +1,50 @@
 <template>
   <div class="profile-container">
-    <!-- 后端状态指示器 -->
     <BackendStatus />
 
     <el-card class="profile-card">
       <template #header>
         <div class="card-header">
-          <h2>个人信息</h2>
-          <el-button @click="$router.back()">返回</el-button>
+          <h2>{{ t('profile.title') }}</h2>
+          <el-button @click="$router.back()">{{ t('common.actions.back') }}</el-button>
         </div>
       </template>
 
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="用户名">
+        <el-descriptions-item :label="t('auth.login.username')">
           {{ userStore.user?.username }}
         </el-descriptions-item>
-        <el-descriptions-item label="角色">
-          {{ userStore.user?.role === "admin" ? "管理员" : "普通用户" }}
+        <el-descriptions-item :label="t('profile.title')">
+          {{ userStore.user?.role === 'admin' ? t('profile.roleAdmin') : t('profile.roleUser') }}
         </el-descriptions-item>
-        <el-descriptions-item label="注册时间">
+        <el-descriptions-item :label="t('profile.registeredAt')">
           {{ formatDate(userStore.user?.created_at) }}
         </el-descriptions-item>
       </el-descriptions>
 
       <el-divider />
 
-      <h3>修改密码</h3>
+      <h3>{{ t('profile.changePassword') }}</h3>
       <el-form
         :model="passwordForm"
         :rules="rules"
         ref="formRef"
-        label-width="100px"
-        style="max-width: 500px"
+        label-width="120px"
+        class="password-form"
       >
-        <el-form-item label="新密码" prop="password">
+        <el-form-item prop="password" :label="t('profile.newPassword')">
           <el-input
             v-model="passwordForm.password"
             type="password"
-            placeholder="请输入新密码（至少6个字符）"
+            :placeholder="t('profile.passwordPlaceholder')"
           />
         </el-form-item>
 
-        <el-form-item label="确认密码" prop="confirmPassword">
+        <el-form-item prop="confirmPassword" :label="t('profile.confirmPassword')">
           <el-input
             v-model="passwordForm.confirmPassword"
             type="password"
-            placeholder="请再次输入新密码"
+            :placeholder="t('profile.confirmPasswordPlaceholder')"
           />
         </el-form-item>
 
@@ -55,7 +54,7 @@
             :loading="loading"
             @click="handleUpdatePassword"
           >
-            修改密码
+            {{ t('profile.update') }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -64,14 +63,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { reactive, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
-import type { FormInstance, FormRules } from "element-plus";
+import type { FormInstance, FormItemRule, FormRules } from "element-plus";
 import { useUserStore } from "../stores/user";
 import { authAPI } from "../api/auth";
 import BackendStatus from "../components/BackendStatus.vue";
 
+const { t, locale } = useI18n();
 const userStore = useUserStore();
+
 const formRef = ref<FormInstance>();
 const loading = ref(false);
 
@@ -80,9 +82,9 @@ const passwordForm = reactive({
   confirmPassword: "",
 });
 
-const validateConfirmPassword = (rule: any, value: any, callback: any) => {
+const validateConfirmPassword = (_rule: any, value: string, callback: (err?: Error) => void) => {
   if (value !== passwordForm.password) {
-    callback(new Error("两次输入的密码不一致"));
+    callback(new Error(t("messages.passwordMismatch")));
   } else {
     callback();
   }
@@ -90,39 +92,54 @@ const validateConfirmPassword = (rule: any, value: any, callback: any) => {
 
 const rules: FormRules = {
   password: [
-    { required: true, message: "请输入新密码", trigger: "blur" },
-    { min: 6, max: 100, message: "密码长度至少6个字符", trigger: "blur" },
+    { required: true, message: t("auth.register.passwordRequired"), trigger: "blur" },
+    { min: 6, message: t("auth.register.passwordRule"), trigger: "blur" },
   ],
   confirmPassword: [
-    { required: true, message: "请再次输入新密码", trigger: "blur" },
+    { required: true, message: t("profile.confirmPasswordRequired"), trigger: "blur" },
     { validator: validateConfirmPassword, trigger: "blur" },
   ],
 };
+
+const toRuleArray = (rules: FormRules[string]): FormItemRule[] => {
+  if (!rules) return []
+  return Array.isArray(rules) ? [...rules] : [rules]
+}
+
+watch(locale, () => {
+  toRuleArray(rules.password).forEach((rule, index) => {
+    if (index === 0) rule.message = t('auth.register.passwordRequired');
+    if (index === 1) rule.message = t('auth.register.passwordRule');
+  });
+  toRuleArray(rules.confirmPassword).forEach((rule, index) => {
+    if (index === 0) rule.message = t('profile.confirmPasswordRequired');
+  });
+});
 
 const handleUpdatePassword = async () => {
   if (!formRef.value) return;
 
   await formRef.value.validate(async (valid) => {
-    if (valid) {
-      loading.value = true;
-      try {
-        await authAPI.updatePassword(passwordForm.password);
-        ElMessage.success("密码修改成功");
-        passwordForm.password = "";
-        passwordForm.confirmPassword = "";
-        formRef.value?.resetFields();
-      } catch (error) {
-        console.error("修改密码失败:", error);
-      } finally {
-        loading.value = false;
-      }
+    if (!valid) return;
+    loading.value = true;
+    try {
+      await authAPI.updatePassword(passwordForm.password);
+      ElMessage.success(t("messages.passwordUpdateSuccess"));
+      passwordForm.password = "";
+      passwordForm.confirmPassword = "";
+      formRef.value?.resetFields();
+    } catch (error) {
+      console.error("Failed to update password:", error);
+      ElMessage.error(t("messages.passwordUpdateFailed"));
+    } finally {
+      loading.value = false;
     }
   });
 };
 
-const formatDate = (dateStr?: string) => {
-  if (!dateStr) return "";
-  return new Date(dateStr).toLocaleString("zh-CN");
+const formatDate = (value?: string) => {
+  if (!value) return "";
+  return new Date(value).toLocaleString(locale.value, { hour12: false });
 };
 </script>
 
@@ -132,10 +149,8 @@ const formatDate = (dateStr?: string) => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  height: 100vh;
   background: var(--color-bgSecondary);
   padding: var(--spacing-xl);
-  overflow-y: auto;
 }
 
 .profile-card {
@@ -164,7 +179,10 @@ h3 {
   font-weight: 600;
 }
 
-/* 确保表单项对齐 */
+.password-form {
+  max-width: 500px;
+}
+
 :deep(.el-form-item__label) {
   font-weight: 500;
   color: var(--color-textSecondary);

@@ -1,10 +1,10 @@
 <template>
-  <div class="login-container">
-    <el-card class="login-card">
+  <div class="auth-container">
+    <el-card class="auth-card">
       <template #header>
         <div class="card-header">
           <h2>{{ websiteName }}</h2>
-          <p>用户登录</p>
+          <p>{{ t('auth.login.title') }}</p>
         </div>
       </template>
 
@@ -12,7 +12,7 @@
         <el-form-item prop="username">
           <el-input
             v-model="loginForm.username"
-            placeholder="请输入用户名"
+            :placeholder="t('auth.login.username')"
             prefix-icon="User"
             size="large"
           />
@@ -22,7 +22,7 @@
           <el-input
             v-model="loginForm.password"
             type="password"
-            placeholder="请输入密码"
+            :placeholder="t('auth.login.password')"
             prefix-icon="Lock"
             size="large"
             @keyup.enter="handleLogin"
@@ -33,21 +33,21 @@
           <el-button
             type="primary"
             size="large"
-            style="width: 100%"
+            class="full-width"
             :loading="loading"
             @click="handleLogin"
           >
-            登录
+            {{ t('auth.login.submit') }}
           </el-button>
         </el-form-item>
 
         <el-form-item>
           <el-button
             size="large"
-            style="width: 100%"
+            class="full-width"
             @click="$router.push('/register')"
           >
-            注册账号
+            {{ t('auth.login.register') }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -56,7 +56,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { reactive, ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
@@ -64,11 +65,13 @@ import { authAPI } from "../api/auth";
 import { useUserStore } from "../stores/user";
 import api from "../api";
 
+const { t } = useI18n();
 const router = useRouter();
 const userStore = useUserStore();
+
 const formRef = ref<FormInstance>();
 const loading = ref(false);
-const websiteName = ref("慢性病诊疗方案推荐系统");
+const websiteName = ref(t("common.appName"));
 
 const loginForm = reactive({
   username: "",
@@ -76,8 +79,8 @@ const loginForm = reactive({
 });
 
 const rules: FormRules = {
-  username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
-  password: [{ required: true, message: "请输入密码", trigger: "blur" }],
+  username: [{ required: true, message: t("auth.login.usernameRequired"), trigger: "blur" }],
+  password: [{ required: true, message: t("auth.login.passwordRequired"), trigger: "blur" }],
 };
 
 const handleLogin = async () => {
@@ -90,14 +93,14 @@ const handleLogin = async () => {
         const res = await authAPI.login(loginForm.username, loginForm.password);
         userStore.setToken(res.data.access_token);
 
-        // 获取用户信息
         const userRes = await authAPI.getCurrentUser();
         userStore.setUser(userRes.data);
 
-        ElMessage.success("登录成功");
+        ElMessage.success(t("messages.loginSuccess"));
         router.push("/chat");
       } catch (error) {
-        console.error("登录失败:", error);
+        console.error("Login failed:", error);
+        ElMessage.error(t("messages.loginFailed"));
       } finally {
         loading.value = false;
       }
@@ -105,19 +108,18 @@ const handleLogin = async () => {
   });
 };
 
-// 获取网站名称
 onMounted(async () => {
   try {
     const res = await api.get("/api/public/settings");
-    websiteName.value = res.data.website_name;
+    websiteName.value = res.data.website_name || t("common.appName");
   } catch (error) {
-    console.error("获取网站设置失败:", error);
+    console.error("Failed to fetch site settings:", error);
   }
 });
 </script>
 
 <style scoped>
-.login-container {
+.auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -130,7 +132,7 @@ onMounted(async () => {
   );
 }
 
-.login-card {
+.auth-card {
   width: 100%;
   max-width: 420px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
@@ -151,6 +153,10 @@ onMounted(async () => {
   margin: 0;
   color: var(--color-textSecondary);
   font-size: var(--font-size-base);
+}
+
+.full-width {
+  width: 100%;
 }
 
 :deep(.el-button) {

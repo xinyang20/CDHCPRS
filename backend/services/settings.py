@@ -1,75 +1,64 @@
 """
 系统设置服务模块
 """
-from sqlalchemy.orm import Session
 from typing import Dict, Optional
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from models.system_setting import SystemSetting
 
 
 def get_setting(db: Session, key: str) -> Optional[str]:
-    """
-    获取单个系统设置
-    
-    Args:
-        db: 数据库会话
-        key: 设置键
-        
-    Returns:
-        设置值，如果不存在返回 None
-    """
-    setting = db.query(SystemSetting).filter(SystemSetting.key == key).first()
-    return setting.value if setting else None
+    """获取单个系统设置"""
+
+    result = db.execute(
+        select(SystemSetting).where(SystemSetting.key == key)
+    ).scalar_one_or_none()
+    return result.value if result else None
 
 
 def get_all_settings(db: Session) -> Dict[str, str]:
-    """
-    获取所有系统设置
-    
-    Args:
-        db: 数据库会话
-        
-    Returns:
-        设置字典
-    """
-    settings = db.query(SystemSetting).all()
-    return {s.key: s.value for s in settings}
+    """获取所有系统设置"""
+
+    results = db.execute(select(SystemSetting)).scalars().all()
+    return {setting.key: setting.value for setting in results}
 
 
 def update_setting(db: Session, key: str, value: str) -> SystemSetting:
-    """
-    更新系统设置
-    
-    Args:
-        db: 数据库会话
-        key: 设置键
-        value: 设置值
-        
-    Returns:
-        更新后的设置对象
-    """
-    setting = db.query(SystemSetting).filter(SystemSetting.key == key).first()
-    
+    """更新单个系统设置"""
+
+    setting = db.execute(
+        select(SystemSetting).where(SystemSetting.key == key)
+    ).scalar_one_or_none()
+
     if setting:
         setting.value = value
     else:
         setting = SystemSetting(key=key, value=value)
         db.add(setting)
-    
+
     db.commit()
     db.refresh(setting)
-    
     return setting
 
 
-def update_multiple_settings(db: Session, settings_dict: Dict[str, str]) -> None:
-    """
-    批量更新系统设置
-    
-    Args:
-        db: 数据库会话
-        settings_dict: 设置字典
-    """
-    for key, value in settings_dict.items():
-        if value is not None:  # 只更新非 None 的值
-            update_setting(db, key, value)
+def update_multiple_settings(db: Session, settings_dict: Dict[str, Optional[str]]) -> None:
+    """批量更新系统设置（忽略值为 None 的键）"""
 
+    filtered = {key: value for key, value in settings_dict.items() if value is not None}
+    if not filtered:
+        return
+
+    existing_settings = db.execute(
+        select(SystemSetting).where(SystemSetting.key.in_(filtered.keys()))
+    ).scalars().all()
+    existing_map = {setting.key: setting for setting in existing_settings}
+
+    for key, value in filtered.items():
+        if key in existing_map:
+            existing_map[key].value = value
+        else:
+            db.add(SystemSetting(key=key, value=value))
+
+    db.commit()

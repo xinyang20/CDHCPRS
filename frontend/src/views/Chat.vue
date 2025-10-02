@@ -1,18 +1,19 @@
 <template>
   <div class="chat-layout">
-    <!-- 后端状态指示器 -->
     <BackendStatus />
 
-    <!-- 侧边栏 -->
-    <div class="sidebar">
+    <aside class="sidebar">
       <div class="sidebar-header">
-        <h2>{{ websiteName }}</h2>
-        <el-button type="primary" @click="createNewConversation" :icon="Plus">
-          新建对话
+        <div class="brand">
+          <h2>{{ websiteName }}</h2>
+          <p class="brand-subtitle">{{ t('chat.sidebarTagline') }}</p>
+        </div>
+        <el-button type="primary" @click="createNewConversation(true)" :icon="Plus">
+          {{ t('chat.newConversation') }}
         </el-button>
       </div>
 
-      <div class="conversation-list">
+      <el-scrollbar class="conversation-scroll">
         <div
           v-for="conv in conversations"
           :key="conv.id"
@@ -25,57 +26,126 @@
           ]"
           @click="selectConversation(conv.id)"
         >
-          <div class="conversation-title">
-            <el-icon><ChatDotRound /></el-icon>
-            <span>{{ conv.title }}</span>
+          <div class="conversation-meta">
+            <div class="conversation-title">
+              <el-icon><ChatDotRound /></el-icon>
+              <span class="title-text">{{ conv.title }}</span>
+              <el-tag
+                v-if="!conv.is_active"
+                size="small"
+                type="warning"
+                effect="plain"
+              >{{ t('common.status.disabled') }}</el-tag>
+            </div>
+            <span class="conversation-time">{{ formatDate(conv.created_at) }}</span>
           </div>
-          <div class="conversation-actions">
-            <el-button
-              type="danger"
-              size="small"
-              :icon="Delete"
-              circle
-              @click.stop="deleteConv(conv.id)"
-            />
+          <div class="conversation-actions" @click.stop>
+            <el-tooltip :content="t('common.actions.delete')" placement="top">
+              <el-button
+                text
+                type="danger"
+                size="small"
+                :icon="Delete"
+                @click="deleteConv(conv.id)"
+              />
+            </el-tooltip>
           </div>
         </div>
-      </div>
+      </el-scrollbar>
 
       <div class="sidebar-footer">
-        <el-dropdown>
+        <el-dropdown trigger="click">
           <span class="user-info">
-            <el-icon><User /></el-icon>
-            {{ userStore.user?.username }}
+            <el-avatar size="small" icon="User" />
+            <span class="user-name">{{ userStore.user?.username }}</span>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="$router.push('/profile')">
-                个人信息
+                {{ t('chat.userMenu.profile') }}
               </el-dropdown-item>
               <el-dropdown-item
                 v-if="userStore.isAdmin()"
                 @click="$router.push('/admin')"
               >
-                管理后台
+                {{ t('chat.userMenu.admin') }}
               </el-dropdown-item>
               <el-dropdown-item divided @click="handleLogout">
-                退出登录
+                {{ t('chat.userMenu.logout') }}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
       </div>
-    </div>
+    </aside>
 
-    <!-- 主内容区 -->
-    <div class="main-content">
+    <main class="main-content">
       <div v-if="!currentConversationId" class="welcome">
-        <h1>欢迎使用慢性病诊疗方案推荐系统</h1>
-        <p>请选择或创建一个对话开始咨询</p>
+        <div class="welcome-card">
+          <h1>{{ t('chat.welcomeTitle') }}</h1>
+          <p>{{ t('chat.welcomeSubtitle') }}</p>
+          <div class="welcome-actions">
+            <el-button type="primary" size="large" @click="createNewConversation(true)">
+              <el-icon><Plus /></el-icon>
+              {{ t('chat.newConversation') }}
+            </el-button>
+            <el-button size="large" @click="loadConversations">{{ t('chat.refresh') }}</el-button>
+          </div>
+        </div>
       </div>
 
       <div v-else class="chat-area">
-        <!-- 消息列表 -->
+        <header class="chat-header">
+          <div class="chat-title">
+            <h1>{{ currentConversation?.title }}</h1>
+            <el-tag v-if="!currentConversation?.is_active" type="warning" effect="plain">
+              {{ t('common.status.disabled') }}
+            </el-tag>
+          </div>
+          <div class="chat-actions">
+            <el-button text size="small" :icon="Refresh" @click="refreshConversation">
+              {{ t('chat.refresh') }}
+            </el-button>
+            <el-button text size="small" :icon="User" @click="openInfoDialog">
+              {{ t('chat.patientProfile') }}
+            </el-button>
+          </div>
+        </header>
+
+        <section class="patient-info-card">
+          <div class="card-header">
+            <div>
+              <h3>{{ t('chat.patientProfile') }}</h3>
+              <p class="card-subtitle">{{ t('chat.patientProfileHint') }}</p>
+            </div>
+            <el-button type="primary" text :icon="EditPen" @click="openInfoDialog">
+              {{ t('chat.updateInfo') }}
+            </el-button>
+          </div>
+
+          <div v-if="hasPatientInfo" class="info-body">
+            <el-descriptions :column="3" border size="small">
+              <el-descriptions-item label="{{ t('chat.age') }}">
+                {{ currentProfile.age || t('chat.fillInfo') }}
+              </el-descriptions-item>
+              <el-descriptions-item label="{{ t('chat.gender') }}">
+                {{ genderLabel(currentProfile.gender) }}
+              </el-descriptions-item>
+              <el-descriptions-item label="{{ t('chat.chiefComplaint') }}">
+                {{ currentProfile.mainComplaint || t('chat.fillInfo') }}
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
+
+          <div v-else class="info-empty">
+            <el-empty description="{{ t('chat.fillInfo') }}">
+              <el-button type="primary" link @click="openInfoDialog">
+                {{ t('chat.fillInfo') }}
+              </el-button>
+            </el-empty>
+          </div>
+        </section>
+
         <div class="message-list" ref="messageListRef">
           <div
             v-for="msg in messages"
@@ -88,165 +158,468 @@
             </div>
             <div class="message-content">
               <MarkdownRenderer :content="msg.content" />
+              <span class="message-time">{{ formatDate(msg.created_at) }}</span>
             </div>
           </div>
 
-          <!-- 流式响应中的消息 -->
           <div v-if="isStreaming" class="message assistant">
             <div class="message-avatar">
               <el-icon><ChatDotRound /></el-icon>
             </div>
-            <div class="message-content">
+            <div class="message-content streaming">
               <MarkdownRenderer :content="streamingContent" />
               <el-icon class="loading-icon"><Loading /></el-icon>
             </div>
           </div>
         </div>
 
-        <!-- 输入区域 -->
-        <div class="input-area">
+        <footer class="input-area" :class="{ 'disabled-conversation': currentConversation && !currentConversation.is_active }">
           <el-alert
             v-if="currentConversation && !currentConversation.is_active"
-            title="此对话已被禁用（管理员已更换模型配置），请创建新对话"
+            :title="t('chat.conversationDisabled')"
             type="warning"
             :closable="false"
-            style="margin-bottom: 10px"
-          />
+            class="mb-base"
+          >
+            <template #default>
+              <p>{{ t('chat.conversationDisabledDetail') }}</p>
+              <el-button
+                type="primary"
+                size="small"
+                :icon="Plus"
+                @click="createNewConversation(true)"
+                class="mt-sm"
+              >
+                {{ t('chat.createNewConversation') }}
+              </el-button>
+            </template>
+          </el-alert>
 
           <el-input
             v-model="inputMessage"
             type="textarea"
-            :rows="3"
-            placeholder="请输入您的问题..."
+            :rows="4"
+            :placeholder="t('chat.questionPlaceholder')"
             :disabled="!currentConversation?.is_active || isStreaming"
-            @keydown.enter.ctrl="sendMessage"
+            @keydown.enter.ctrl.prevent="sendMessage"
           />
           <div class="input-actions">
-            <span class="tip">Ctrl + Enter 发送</span>
-            <el-button
-              type="primary"
-              :loading="isStreaming"
-              :disabled="
-                !inputMessage.trim() || !currentConversation?.is_active
-              "
-              @click="sendMessage"
-            >
-              发送
-            </el-button>
+            <span class="tip">Ctrl + Enter {{ t('chat.send') }}</span>
+            <div class="action-buttons">
+              <el-button
+                text
+                size="small"
+                :icon="EditPen"
+                @click="openInfoDialog"
+                :disabled="!currentConversation?.is_active"
+              >
+                {{ t('chat.updateInfo') }}
+              </el-button>
+              <el-button
+                type="primary"
+                :loading="isStreaming"
+                :disabled="!inputMessage.trim() || !currentConversation?.is_active"
+                @click="sendMessage"
+              >
+                {{ t('chat.send') }}
+              </el-button>
+            </div>
           </div>
-        </div>
+        </footer>
       </div>
-    </div>
+    </main>
+
+    <el-dialog
+      v-model="infoDialogVisible"
+      title="{{ t('chat.infoDialogTitle') }}"
+      width="520px"
+      destroy-on-close
+    >
+      <el-form ref="infoFormRef" :model="infoForm" :rules="infoRules" label-width="90px">
+        <el-form-item label="{{ t('chat.age') }}" prop="age">
+          <el-input v-model="infoForm.age" :placeholder="t('chat.age')" maxlength="3" />
+        </el-form-item>
+        <el-form-item label="{{ t('chat.gender') }}" prop="gender">
+          <el-radio-group v-model="infoForm.gender">
+            <el-radio label="male">{{ t('chat.genderMale') }}</el-radio>
+            <el-radio label="female">{{ t('chat.genderFemale') }}</el-radio>
+            <el-radio label="other">{{ t('chat.genderOther') }}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="{{ t('chat.chiefComplaint') }}" prop="mainComplaint">
+          <el-input
+            v-model="infoForm.mainComplaint"
+            type="textarea"
+            :rows="4"
+            maxlength="400"
+            show-word-limit
+            :placeholder="t('chat.chiefComplaintPlaceholder')"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="skipInfoDialog">{{ t('chat.infoSkip') }}</el-button>
+          <el-button text type="danger" @click="clearInfoForm">{{ t('chat.infoClear') }}</el-button>
+          <el-button type="primary" @click="savePatientInfo">{{ t('chat.infoSave') }}</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
+
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed } from "vue";
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import { ElMessage, ElMessageBox } from "element-plus";
 import {
   Plus,
   Delete,
   User,
   ChatDotRound,
   Loading,
+  EditPen,
+  Refresh,
 } from "@element-plus/icons-vue";
-import { useUserStore } from "../stores/user";
-import { chatAPI } from "../api/chat";
+import { ElMessage, ElMessageBox } from "element-plus";
+import type { FormInstance, FormRules } from "element-plus";
+
 import api from "../api";
-import MarkdownRenderer from "../components/MarkdownRenderer.vue";
+import { chatAPI } from "../api/chat";
+import { useUserStore } from "../stores/user";
 import BackendStatus from "../components/BackendStatus.vue";
+import MarkdownRenderer from "../components/MarkdownRenderer.vue";
+
+interface ConversationItem {
+  id: number;
+  title: string;
+  user_id: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+interface MessageItem {
+  id: number;
+  conversation_id: number;
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+}
+
+interface PatientProfile {
+  age: string;
+  gender: string;
+  mainComplaint: string;
+}
+
+const PROFILE_STORAGE_KEY = "cdhcprs_conversation_profiles";
+
+const buildDefaultProfile = (): PatientProfile => ({
+  age: "",
+  gender: "",
+  mainComplaint: "",
+});
 
 const router = useRouter();
 const userStore = useUserStore();
+const { t, locale } = useI18n();
 
-const websiteName = ref("慢性病诊疗方案推荐系统");
-const conversations = ref<any[]>([]);
+const websiteName = ref(t("common.appName"));
+const conversations = ref<ConversationItem[]>([]);
 const currentConversationId = ref<number | null>(null);
-const messages = ref<any[]>([]);
-const inputMessage = ref("");
+const messages = ref<MessageItem[]>([]);
 const isStreaming = ref(false);
 const streamingContent = ref("");
+const inputMessage = ref("");
 const messageListRef = ref<HTMLElement>();
 
-const currentConversation = computed(() => {
-  return conversations.value.find((c) => c.id === currentConversationId.value);
+const conversationProfiles = ref<Record<number, PatientProfile>>({});
+const infoDialogVisible = ref(false);
+const infoFormRef = ref<FormInstance>();
+const infoForm = reactive<PatientProfile>(buildDefaultProfile());
+const shouldAttachUserInfo = ref(false);
+
+const infoRules: FormRules = {
+  age: [
+    {
+      validator: (_rule, value, callback) => {
+        if (!value) {
+          callback();
+          return;
+        }
+        const num = Number(value);
+        if (!Number.isInteger(num) || num < 0 || num > 120) {
+          callback(new Error(t("chat.ageError")));
+          return;
+        }
+        callback();
+      },
+      trigger: "blur",
+    },
+  ],
+  mainComplaint: [
+    {
+      validator: (_rule, value, callback) => {
+        if (value && value.length < 4) {
+          callback(new Error(t("chat.chiefComplaintError")));
+          return;
+        }
+        callback();
+      },
+      trigger: "blur",
+    },
+  ],
+};
+
+const currentConversation = computed(() =>
+  conversations.value.find((item) => item.id === currentConversationId.value) || null
+);
+
+const currentProfile = computed<PatientProfile>(() => {
+  const id = currentConversationId.value;
+  if (!id) {
+    return buildDefaultProfile();
+  }
+  if (!conversationProfiles.value[id]) {
+    conversationProfiles.value[id] = buildDefaultProfile();
+  }
+  return conversationProfiles.value[id];
 });
 
-// 加载对话列表
+const hasPatientInfo = computed(() => {
+  const profile = currentProfile.value;
+  return [profile.age, profile.gender, profile.mainComplaint].some((v) => v && v.trim());
+});
+
+const genderLabel = (gender: string) => {
+  if (gender === "male") return t("chat.genderMale");
+  if (gender === "female") return t("chat.genderFemale");
+  if (gender === "other") return t("chat.genderOther");
+  return t("chat.fillInfo");
+};
+
+const formatDate = (value?: string) => {
+  if (!value) return "";
+  return new Date(value).toLocaleString(locale.value, {
+    hour12: false,
+  });
+};
+
+const scrollToBottom = async () => {
+  await nextTick();
+  if (messageListRef.value) {
+    messageListRef.value.scrollTop = messageListRef.value.scrollHeight;
+  }
+};
+
+const persistProfiles = () => {
+  localStorage.setItem(
+    PROFILE_STORAGE_KEY,
+    JSON.stringify(conversationProfiles.value)
+  );
+};
+
+const restoreProfiles = () => {
+  try {
+    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Record<number, PatientProfile>;
+      conversationProfiles.value = parsed;
+    }
+  } catch (error) {
+    console.error("Failed to restore patient profile", error);
+  }
+};
+
+watch(
+  conversationProfiles,
+  () => {
+    persistProfiles();
+  },
+  { deep: true }
+);
+
+const prepareInfoForm = () => {
+  Object.assign(infoForm, buildDefaultProfile(), currentProfile.value);
+};
+
+const openInfoDialog = () => {
+  if (!currentConversationId.value) {
+    ElMessage.warning(t("messages.selectConversationWarning"));
+    return;
+  }
+  prepareInfoForm();
+  infoDialogVisible.value = true;
+};
+
+const skipInfoDialog = () => {
+  infoDialogVisible.value = false;
+  if (messages.value.length === 0) {
+    shouldAttachUserInfo.value = hasPatientInfo.value;
+  }
+};
+
+const clearInfoForm = () => {
+  Object.assign(infoForm, buildDefaultProfile());
+};
+
+const savePatientInfo = async () => {
+  if (!currentConversationId.value) {
+    ElMessage.warning(t("messages.needSelectConversation"));
+    return;
+  }
+  if (!infoFormRef.value) {
+    return;
+  }
+  await infoFormRef.value.validate(async (valid) => {
+    if (!valid) return;
+    conversationProfiles.value[currentConversationId.value!] = {
+      age: infoForm.age.trim(),
+      gender: infoForm.gender,
+      mainComplaint: infoForm.mainComplaint.trim(),
+    };
+    infoDialogVisible.value = false;
+    shouldAttachUserInfo.value = true;
+    ElMessage.success(t("chat.infoSaved"));
+  });
+};
+
+const formatUserInfoForPrompt = (profile: PatientProfile) => {
+  return [
+    `${t('chat.age')}: ${profile.age || t('chat.fillInfo')}`,
+    `${t('chat.gender')}: ${genderLabel(profile.gender)}`,
+    `${t('chat.chiefComplaint')}: ${profile.mainComplaint || t('chat.fillInfo')}`,
+  ].join("\n");
+};
+
 const loadConversations = async () => {
   try {
     const res = await chatAPI.getConversations();
     conversations.value = res.data;
   } catch (error) {
-    console.error("加载对话列表失败:", error);
+    console.error("Failed to load conversations:", error);
   }
 };
 
-// 创建新对话
-const createNewConversation = async () => {
-  try {
-    const res = await chatAPI.createConversation("新对话");
-    await loadConversations();
-    selectConversation(res.data.id);
-    ElMessage.success("创建成功");
-  } catch (error) {
-    console.error("创建对话失败:", error);
-  }
-};
-
-// 选择对话
-const selectConversation = async (id: number) => {
-  currentConversationId.value = id;
-  await loadMessages(id);
-};
-
-// 加载消息
 const loadMessages = async (conversationId: number) => {
   try {
     const res = await chatAPI.getMessages(conversationId);
     messages.value = res.data;
-    await nextTick();
-    scrollToBottom();
+    await scrollToBottom();
+    if (messages.value.length === 0 && hasPatientInfo.value) {
+      shouldAttachUserInfo.value = true;
+    }
   } catch (error) {
-    console.error("加载消息失败:", error);
+    console.error("Failed to load messages:", error);
   }
 };
 
-// 发送消息
+const selectConversation = async (id: number) => {
+  if (currentConversationId.value === id) return;
+  currentConversationId.value = id;
+  await loadMessages(id);
+};
+
+const createNewConversation = async (promptInfo = false) => {
+  try {
+    const defaultTitle = t("chat.newConversation");
+    const res = await chatAPI.createConversation(defaultTitle);
+    await loadConversations();
+    await selectConversation(res.data.id);
+    if (promptInfo) {
+      await nextTick();
+      openInfoDialog();
+    }
+    ElMessage.success(t("messages.conversationCreated"));
+  } catch (error) {
+    console.error("Failed to create conversation:", error);
+  }
+};
+
+const deleteConv = async (id: number) => {
+  try {
+    await ElMessageBox.confirm(t("messages.deleteConversationConfirm"), t("messages.confirmTitle"), {
+      confirmButtonText: t("common.actions.confirm"),
+      cancelButtonText: t("common.actions.cancel"),
+      type: "warning",
+    });
+
+    await chatAPI.deleteConversation(id);
+    await loadConversations();
+
+    if (currentConversationId.value === id) {
+      currentConversationId.value = null;
+      messages.value = [];
+    }
+
+    if (conversationProfiles.value[id]) {
+      const { [id]: _removed, ...rest } = conversationProfiles.value;
+      conversationProfiles.value = rest;
+    }
+
+    ElMessage.success(t("messages.deleteSuccess"));
+  } catch (error) {
+    if (error !== "cancel") {
+      console.error("Failed to delete conversation:", error);
+    }
+  }
+};
+
+const refreshConversation = async () => {
+  if (!currentConversationId.value) return;
+  await loadMessages(currentConversationId.value);
+};
+
 const sendMessage = async () => {
   if (!inputMessage.value.trim() || !currentConversationId.value) return;
   if (!currentConversation.value?.is_active) {
-    ElMessage.warning("此对话已被禁用，请创建新对话");
+    ElMessage.warning(t("chat.conversationDisabled"));
     return;
   }
 
   const content = inputMessage.value;
   inputMessage.value = "";
 
-  // 添加用户消息到列表
-  messages.value.push({
+  const tempMessage: MessageItem = {
     id: Date.now(),
+    conversation_id: currentConversationId.value,
     role: "user",
-    content: content,
+    content,
     created_at: new Date().toISOString(),
-  });
+  };
+  messages.value.push(tempMessage);
 
-  await nextTick();
-  scrollToBottom();
+  if (currentConversation.value && currentConversation.value.title === t("chat.newConversation")) {
+    const preview = content.trim();
+    if (preview) {
+      currentConversation.value.title =
+        preview.length > 20 ? `${preview.slice(0, 20)}…` : preview;
+    }
+  }
 
-  // 发送流式请求
+  await scrollToBottom();
+
   isStreaming.value = true;
   streamingContent.value = "";
+
+  const existingUserMessages = messages.value.filter((msg) => msg.role === "user").length;
+  const attachInfoNow = shouldAttachUserInfo.value || (existingUserMessages === 1 && hasPatientInfo.value);
+  const userInfoPayload = attachInfoNow
+    ? formatUserInfoForPrompt(currentProfile.value)
+    : undefined;
+
+  let sendSuccess = false;
 
   try {
     const response = await chatAPI.sendMessage(
       currentConversationId.value,
-      content
+      content,
+      userInfoPayload
     );
 
     if (!response.ok) {
-      throw new Error("发送失败");
+      throw new Error(t("messages.sendFailed"));
     }
 
     const reader = response.body?.getReader();
@@ -259,69 +632,64 @@ const sendMessage = async () => {
 
         const chunk = decoder.decode(value, { stream: true });
         streamingContent.value += chunk;
-
-        await nextTick();
-        scrollToBottom();
+        await scrollToBottom();
       }
 
-      // 流式响应完成，添加到消息列表
       messages.value.push({
-        id: Date.now(),
+        id: Date.now() + 1,
+        conversation_id: currentConversationId.value,
         role: "assistant",
         content: streamingContent.value,
         created_at: new Date().toISOString(),
       });
+      sendSuccess = true;
     }
   } catch (error) {
-    console.error("发送消息失败:", error);
-    ElMessage.error("发送失败，请重试");
+    console.error("Failed to send message:", error);
+    ElMessage.error(t("messages.sendFailed"));
+    inputMessage.value = content;
+    messages.value = messages.value.filter((msg) => msg.id !== tempMessage.id);
   } finally {
     isStreaming.value = false;
     streamingContent.value = "";
+    if (attachInfoNow && sendSuccess) {
+      shouldAttachUserInfo.value = false;
+    }
+    await scrollToBottom();
   }
 };
 
-// 删除对话
-const deleteConv = async (id: number) => {
-  try {
-    await ElMessageBox.confirm("确定要删除这个对话吗？", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    });
-
-    await chatAPI.deleteConversation(id);
-    await loadConversations();
-
-    if (currentConversationId.value === id) {
-      currentConversationId.value = null;
-      messages.value = [];
-    }
-
-    ElMessage.success("删除成功");
-  } catch (error) {
-    if (error !== "cancel") {
-      console.error("删除对话失败:", error);
-    }
-  }
-};
-
-// 退出登录
 const handleLogout = () => {
   userStore.logout();
   router.push("/login");
 };
 
-// 滚动到底部
-const scrollToBottom = () => {
-  if (messageListRef.value) {
-    messageListRef.value.scrollTop = messageListRef.value.scrollHeight;
-  }
-};
+// 定期检查对话状态（检测模型切换）
+const checkConversationStatus = async () => {
+  if (!currentConversationId.value) return
 
-// 初始化
+  try {
+    const res = await chatAPI.getConversations()
+    const currentConv = res.data.find((c) => c.id === currentConversationId.value)
+
+    if (currentConv && !currentConv.is_active && currentConversation.value?.is_active) {
+      // 对话被禁用了
+      ElMessage.warning({
+        message: t("chat.modelUpdatedNotice"),
+        duration: 10000,
+        showClose: true,
+      })
+      await loadConversations()
+    }
+  } catch (error) {
+    console.error("Failed to check conversation status:", error)
+  }
+}
+
+let statusCheckInterval: number | null = null
+
 onMounted(async () => {
-  // 获取用户信息
+  restoreProfiles();
   if (!userStore.user) {
     try {
       const res = await api.get("/api/auth/users/me");
@@ -332,103 +700,131 @@ onMounted(async () => {
     }
   }
 
-  // 获取网站名称
   try {
     const res = await api.get("/api/public/settings");
     websiteName.value = res.data.website_name;
   } catch (error) {
-    console.error("获取网站设置失败:", error);
+    console.error("Failed to fetch site settings:", error);
   }
 
-  // 加载对话列表
   await loadConversations();
+
+  // 每30秒检查一次对话状态
+  statusCheckInterval = window.setInterval(checkConversationStatus, 30000)
 });
+
+// 组件卸载时清除定时器
+import { onUnmounted } from 'vue'
+onUnmounted(() => {
+  if (statusCheckInterval !== null) {
+    clearInterval(statusCheckInterval)
+  }
+})
 </script>
 
 <style scoped>
 .chat-layout {
-  display: flex;
+  display: grid;
+  grid-template-columns: 300px 1fr;
   height: 100vh;
-  background: var(--color-bgSecondary);
+  background: linear-gradient(120deg, rgba(240, 160, 75, 0.08), #ffffff 45%);
   overflow: hidden;
 }
 
 .sidebar {
-  width: 280px;
-  background: var(--color-bgPrimary);
-  border-right: 1px solid var(--color-borderPrimary);
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.92);
+  border-right: 1px solid var(--color-borderPrimary);
+  backdrop-filter: blur(12px);
 }
 
 .sidebar-header {
   padding: var(--spacing-xl);
   border-bottom: 1px solid var(--color-borderPrimary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
-.sidebar-header h2 {
-  margin: 0 0 var(--spacing-base) 0;
-  font-size: var(--font-size-lg);
-  font-weight: 600;
+.brand h2 {
+  margin: 0;
+  font-size: var(--font-size-xl);
   color: var(--color-primary);
+  font-weight: 700;
 }
 
-.conversation-list {
+.brand-subtitle {
+  margin: 4px 0 0;
+  color: var(--color-textTertiary);
+  font-size: var(--font-size-sm);
+}
+
+.conversation-scroll {
   flex: 1;
-  overflow-y: auto;
-  padding: var(--spacing-md);
 }
 
 .conversation-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-sm);
-  border-radius: var(--border-radius-base);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-borderLight);
   cursor: pointer;
   transition: all var(--transition-base);
 }
 
 .conversation-item:hover {
-  background: var(--color-bgSecondary);
+  background: rgba(240, 160, 75, 0.08);
 }
 
 .conversation-item.active {
   background: var(--color-primary);
   color: var(--color-white);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.conversation-item.active .conversation-time,
+.conversation-item.active .conversation-actions .el-button,
+.conversation-item.active .title-text {
+  color: var(--color-white);
 }
 
 .conversation-item.inactive {
-  opacity: 0.5;
+  opacity: 0.65;
+}
+
+.conversation-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .conversation-title {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  flex: 1;
-  overflow: hidden;
+  max-width: 200px;
 }
 
-.conversation-title span {
+.title-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
+}
+
+.conversation-time {
+  font-size: var(--font-size-xs);
+  color: var(--color-textTertiary);
 }
 
 .conversation-actions {
-  opacity: 0;
-  transition: opacity var(--transition-base);
-}
-
-.conversation-item:hover .conversation-actions {
-  opacity: 1;
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
 }
 
 .sidebar-footer {
-  padding: var(--spacing-base);
+  padding: var(--spacing-lg);
   border-top: 1px solid var(--color-borderPrimary);
 }
 
@@ -437,63 +833,130 @@ onMounted(async () => {
   align-items: center;
   gap: var(--spacing-sm);
   cursor: pointer;
-  padding: var(--spacing-sm);
-  border-radius: var(--border-radius-sm);
-  transition: background var(--transition-base);
   color: var(--color-textPrimary);
+}
+
+.user-name {
   font-weight: 500;
 }
 
-.user-info:hover {
-  background: var(--color-bgSecondary);
-}
-
 .main-content {
-  flex: 1;
+  position: relative;
+  background: rgba(255, 255, 255, 0.96);
   display: flex;
   flex-direction: column;
-  background: var(--color-bgPrimary);
-  overflow: hidden;
 }
 
 .welcome {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  color: var(--color-textTertiary);
+  justify-content: center;
 }
 
-.welcome h1 {
-  font-size: var(--font-size-3xl);
-  font-weight: 600;
-  color: var(--color-textSecondary);
+.welcome-card {
+  background: linear-gradient(135deg, rgba(240, 160, 75, 0.12), rgba(240, 160, 75, 0.22));
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-4xl);
+  text-align: center;
+  max-width: 520px;
+  box-shadow: 0 18px 40px rgba(240, 160, 75, 0.18);
+}
+
+.welcome-card h1 {
   margin-bottom: var(--spacing-base);
+  color: var(--color-primary);
 }
 
-.welcome p {
-  font-size: var(--font-size-lg);
+.welcome-card p {
+  color: var(--color-textSecondary);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.welcome-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-lg);
 }
 
 .chat-area {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
   overflow: hidden;
+}
+
+.chat-header {
+  padding: var(--spacing-xl) var(--spacing-2xl) var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--color-borderPrimary);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.chat-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.chat-title h1 {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  color: var(--color-textPrimary);
+}
+
+.chat-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.patient-info-card {
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  border-bottom: 1px solid var(--color-borderLight);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.patient-info-card .card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-textPrimary);
+}
+
+.card-subtitle {
+  margin: var(--spacing-xs) 0 0;
+  color: var(--color-textSecondary);
+  font-size: var(--font-size-sm);
+}
+
+.info-body {
+  margin-top: var(--spacing-lg);
+}
+
+.info-empty {
+  margin-top: var(--spacing-lg);
 }
 
 .message-list {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-xl);
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 229, 204, 0.25));
 }
 
 .message {
   display: flex;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-xl);
+  align-items: flex-start;
 }
 
 .message.user {
@@ -501,54 +964,79 @@ onMounted(async () => {
 }
 
 .message-avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--border-radius-full);
   background: var(--color-primary);
+  color: var(--color-white);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-white);
-  flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(240, 160, 75, 0.35);
 }
 
 .message.user .message-avatar {
   background: #409eff;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
 }
 
 .message-content {
   max-width: 70%;
-  padding: var(--spacing-md) var(--spacing-base);
-  border-radius: var(--border-radius-base);
-  background: var(--color-bgSecondary);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
   position: relative;
-  line-height: 1.6;
+  overflow: hidden;
 }
 
 .message.user .message-content {
-  background: #e3f2fd;
+  background: rgba(64, 158, 255, 0.12);
+}
+
+.message-time {
+  display: block;
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-textTertiary);
+}
+
+.message-content.streaming {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .loading-icon {
-  margin-left: var(--spacing-sm);
   animation: rotate 1s linear infinite;
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  color: var(--color-primary);
 }
 
 .input-area {
-  padding: var(--spacing-xl);
+  padding: var(--spacing-xl) var(--spacing-2xl);
   border-top: 1px solid var(--color-borderPrimary);
-  background: var(--color-bgPrimary);
-  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.95);
+  position: sticky;
+  bottom: 0;
+  transition: all 0.3s ease;
+}
+
+.input-area.disabled-conversation {
+  background: rgba(255, 243, 224, 0.95);
+  border-top: 2px solid #ffa726;
+}
+
+.input-area.disabled-conversation :deep(.el-textarea__inner) {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.mt-sm {
+  margin-top: var(--spacing-sm);
+}
+
+.mb-base {
+  margin-bottom: var(--spacing-md);
 }
 
 .input-actions {
@@ -563,12 +1051,48 @@ onMounted(async () => {
   color: var(--color-textTertiary);
 }
 
-:deep(.el-button) {
-  font-weight: 500;
-  transition: all var(--transition-base);
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
-:deep(.el-textarea__inner) {
-  font-family: var(--font-family-base);
+.dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1200px) {
+  .chat-layout {
+    grid-template-columns: 260px 1fr;
+  }
+
+  .message-content {
+    max-width: 80%;
+  }
+}
+
+@media (max-width: 960px) {
+  .chat-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    height: 100vh;
+  }
 }
 </style>

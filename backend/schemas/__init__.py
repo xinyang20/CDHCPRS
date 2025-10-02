@@ -10,7 +10,8 @@ from .message import MessageBase, MessageCreate, MessageResponse
 from .settings import (
     SystemSettingBase, SystemSettingResponse,
     PublicSettings, AdminSettings, AdminSettingsUpdate,
-    TestConnectionRequest, TestConnectionResponse
+    TestConnectionRequest, TestConnectionResponse,
+    ModelOption, ModelListResponse, ModelListRequest
 )
 
 __all__ = [
@@ -25,5 +26,6 @@ __all__ = [
     "SystemSettingBase", "SystemSettingResponse",
     "PublicSettings", "AdminSettings", "AdminSettingsUpdate",
     "TestConnectionRequest", "TestConnectionResponse",
+    "ModelOption", "ModelListResponse", "ModelListRequest",
 ]
 

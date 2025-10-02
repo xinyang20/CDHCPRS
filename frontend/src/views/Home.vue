@@ -1,110 +1,61 @@
 <template>
   <div class="home-container">
-    <!-- 顶部导航栏 -->
     <header class="header">
       <div class="header-content">
         <h1 class="logo">{{ websiteName }}</h1>
         <nav class="nav">
-          <el-button text @click="scrollToSection('features')">功能特性</el-button>
-          <el-button text @click="scrollToSection('about')">关于系统</el-button>
-          <el-button @click="$router.push('/login')">登录</el-button>
-          <el-button type="primary" @click="$router.push('/register')">注册</el-button>
+          <el-button text @click="scrollToSection('features')">{{ t('home.nav.features') }}</el-button>
+          <el-button text @click="scrollToSection('about')">{{ t('home.nav.about') }}</el-button>
+          <el-button @click="$router.push('/login')">{{ t('home.nav.login') }}</el-button>
+          <el-button type="primary" @click="$router.push('/register')">{{ t('home.nav.register') }}</el-button>
         </nav>
       </div>
     </header>
 
-    <!-- 主要内容区 -->
     <main class="main-content">
-      <!-- 英雄区域 -->
       <section class="hero-section">
         <div class="hero-content">
-          <h1 class="hero-title">慢性病诊疗方案推荐系统</h1>
-          <p class="hero-subtitle">
-            基于大语言模型的智能医疗辅助系统，为慢性病患者提供专业的诊疗建议
-          </p>
+          <h1 class="hero-title">{{ t('home.hero.title') }}</h1>
+          <p class="hero-subtitle">{{ t('home.hero.subtitle') }}</p>
           <div class="hero-actions">
             <el-button type="primary" size="large" @click="$router.push('/register')">
               <el-icon><UserFilled /></el-icon>
-              立即开始
+              {{ t('home.hero.cta') }}
             </el-button>
             <el-button size="large" @click="$router.push('/login')">
               <el-icon><Right /></el-icon>
-              已有账号
+              {{ t('home.hero.ctaExisting') }}
             </el-button>
           </div>
         </div>
       </section>
 
-      <!-- 功能特性区域 -->
       <section id="features" class="features-section">
-        <h2 class="section-title">核心功能</h2>
+        <h2 class="section-title">{{ t('home.features.title') }}</h2>
         <div class="features-grid">
-          <div class="feature-card">
+          <div
+            v-for="feature in featureCards"
+            :key="feature.titleKey"
+            class="feature-card"
+          >
             <div class="feature-icon">
-              <el-icon :size="48"><ChatDotRound /></el-icon>
+              <el-icon :size="48"><component :is="feature.icon" /></el-icon>
             </div>
-            <h3>智能对话</h3>
-            <p>基于大语言模型的智能对话系统，提供专业的医疗咨询服务</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon">
-              <el-icon :size="48"><Document /></el-icon>
-            </div>
-            <h3>方案推荐</h3>
-            <p>根据患者症状和病史，智能推荐个性化的诊疗方案</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon">
-              <el-icon :size="48"><DataAnalysis /></el-icon>
-            </div>
-            <h3>数据分析</h3>
-            <p>全面分析患者健康数据，提供科学的健康管理建议</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon">
-              <el-icon :size="48"><Lock /></el-icon>
-            </div>
-            <h3>隐私保护</h3>
-            <p>严格的数据加密和隐私保护机制，确保患者信息安全</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon">
-              <el-icon :size="48"><Clock /></el-icon>
-            </div>
-            <h3>24/7 服务</h3>
-            <p>全天候在线服务，随时随地获取专业的医疗咨询</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon">
-              <el-icon :size="48"><Star /></el-icon>
-            </div>
-            <h3>专业可靠</h3>
-            <p>基于权威医学知识库，提供准确可靠的医疗建议</p>
+            <h3>{{ t(feature.titleKey) }}</h3>
+            <p>{{ t(feature.descriptionKey) }}</p>
           </div>
         </div>
       </section>
 
-      <!-- 关于系统区域 -->
       <section id="about" class="about-section">
-        <h2 class="section-title">关于系统</h2>
+        <h2 class="section-title">{{ t('home.about.title') }}</h2>
         <div class="about-content">
           <div class="about-text">
-            <h3>专业的慢性病管理平台</h3>
-            <p>
-              本系统采用先进的大语言模型技术，结合专业的医学知识库，
-              为慢性病患者提供智能化的诊疗方案推荐服务。
-            </p>
-            <p>
-              我们致力于通过人工智能技术，帮助患者更好地理解和管理自己的健康状况，
-              提供个性化的健康建议，改善生活质量。
-            </p>
+            <h3>{{ t('home.about.heading') }}</h3>
+            <p>{{ t('home.about.description1') }}</p>
+            <p>{{ t('home.about.description2') }}</p>
             <el-button type="primary" @click="$router.push('/about')">
-              了解更多
+              {{ t('home.about.more') }}
               <el-icon><Right /></el-icon>
             </el-button>
           </div>
@@ -117,25 +68,23 @@
       </section>
     </main>
 
-    <!-- 页脚 -->
     <footer class="footer">
       <div class="footer-content">
-        <p>&copy; 2024 慢性病诊疗方案推荐系统. All rights reserved.</p>
+        <p>&copy; 2024 {{ websiteName }}. {{ t('home.footer.terms') }}</p>
         <div class="footer-links">
-          <el-button text @click="$router.push('/about')">关于我们</el-button>
-          <el-button text>隐私政策</el-button>
-          <el-button text>使用条款</el-button>
+          <el-button text @click="$router.push('/about')">{{ t('home.footer.privacy') }}</el-button>
+          <el-button text>{{ t('home.footer.terms') }}</el-button>
         </div>
       </div>
     </footer>
 
-    <!-- 后端状态指示器 -->
     <BackendStatus />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import {
   UserFilled,
   Right,
@@ -150,7 +99,18 @@ import {
 import api from "../api";
 import BackendStatus from "../components/BackendStatus.vue";
 
-const websiteName = ref("慢性病诊疗方案推荐系统");
+const { t } = useI18n();
+
+const websiteName = ref(t("common.appName"));
+
+const featureCards = [
+  { icon: ChatDotRound, titleKey: "home.features.cards.chat.title", descriptionKey: "home.features.cards.chat.description" },
+  { icon: Document, titleKey: "home.features.cards.plan.title", descriptionKey: "home.features.cards.plan.description" },
+  { icon: DataAnalysis, titleKey: "home.features.cards.analysis.title", descriptionKey: "home.features.cards.analysis.description" },
+  { icon: Lock, titleKey: "home.features.cards.privacy.title", descriptionKey: "home.features.cards.privacy.description" },
+  { icon: Clock, titleKey: "home.features.cards.service.title", descriptionKey: "home.features.cards.service.description" },
+  { icon: Star, titleKey: "home.features.cards.reliable.title", descriptionKey: "home.features.cards.reliable.description" }
+];
 
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId);
@@ -159,13 +119,12 @@ const scrollToSection = (sectionId: string) => {
   }
 };
 
-// 获取网站名称
 onMounted(async () => {
   try {
     const res = await api.get("/api/public/settings");
-    websiteName.value = res.data.website_name;
+    websiteName.value = res.data.website_name || t("common.appName");
   } catch (error) {
-    console.error("获取网站设置失败:", error);
+    console.error("Failed to fetch site settings:", error);
   }
 });
 </script>
@@ -178,7 +137,6 @@ onMounted(async () => {
   background: var(--color-bgPrimary);
 }
 
-/* 顶部导航栏 */
 .header {
   position: sticky;
   top: 0;
@@ -210,12 +168,10 @@ onMounted(async () => {
   align-items: center;
 }
 
-/* 主要内容 */
 .main-content {
   flex: 1;
 }
 
-/* 英雄区域 */
 .hero-section {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primaryLight) 100%);
   padding: var(--spacing-5xl) var(--spacing-xl);
@@ -248,7 +204,6 @@ onMounted(async () => {
   justify-content: center;
 }
 
-/* 功能特性区域 */
 .features-section {
   padding: var(--spacing-5xl) var(--spacing-xl);
   background: var(--color-bgSecondary);
@@ -303,7 +258,6 @@ onMounted(async () => {
   margin: 0;
 }
 
-/* 关于系统区域 */
 .about-section {
   padding: var(--spacing-5xl) var(--spacing-xl);
   background: var(--color-bgPrimary);
@@ -342,7 +296,6 @@ onMounted(async () => {
   align-items: center;
 }
 
-/* 页脚 */
 .footer {
   background: var(--color-textPrimary);
   color: var(--color-white);
@@ -352,7 +305,8 @@ onMounted(async () => {
 
 .footer-content {
   max-width: 1280px;
-  margin: 0 auto;
+  margin: 0
+  auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -360,38 +314,25 @@ onMounted(async () => {
 
 .footer-content p {
   margin: 0;
-  opacity: 0.8;
+  font-size: var(--font-size-sm);
 }
 
 .footer-links {
   display: flex;
-  gap: var(--spacing-base);
+  gap: var(--spacing-sm);
 }
 
-.footer-links .el-button {
+.footer-links :deep(.el-button) {
   color: var(--color-white);
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: var(--font-size-3xl);
-  }
-
-  .hero-subtitle {
-    font-size: var(--font-size-lg);
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 960px) {
   .about-content {
     grid-template-columns: 1fr;
   }
 
-  .about-image {
-    order: -1;
+  .hero-actions {
+    flex-direction: column;
   }
 
   .footer-content {
@@ -399,10 +340,5 @@ onMounted(async () => {
     gap: var(--spacing-base);
     text-align: center;
   }
-
-  .nav {
-    flex-wrap: wrap;
-  }
 }
 </style>
-

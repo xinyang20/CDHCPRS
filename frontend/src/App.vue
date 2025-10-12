@@ -1,11 +1,8 @@
 <template>
   <router-view />
-  <LanguageSwitcher />
 </template>
 
-<script setup lang="ts">
-import LanguageSwitcher from "./components/LanguageSwitcher.vue";
-</script>
+<script setup lang="ts"></script>
 
 <style>
 #app {

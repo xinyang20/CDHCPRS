@@ -5,8 +5,13 @@
     <el-card class="profile-card">
       <template #header>
         <div class="card-header">
-          <h2>{{ t('profile.title') }}</h2>
-          <el-button @click="$router.back()">{{ t('common.actions.back') }}</el-button>
+          <h2>{{ t("profile.title") }}</h2>
+          <div class="header-actions">
+            <LanguageSwitcher />
+            <el-button @click="$router.back()">{{
+              t("common.actions.back")
+            }}</el-button>
+          </div>
         </div>
       </template>
 
@@ -15,7 +20,11 @@
           {{ userStore.user?.username }}
         </el-descriptions-item>
         <el-descriptions-item :label="t('profile.title')">
-          {{ userStore.user?.role === 'admin' ? t('profile.roleAdmin') : t('profile.roleUser') }}
+          {{
+            userStore.user?.role === "admin"
+              ? t("profile.roleAdmin")
+              : t("profile.roleUser")
+          }}
         </el-descriptions-item>
         <el-descriptions-item :label="t('profile.registeredAt')">
           {{ formatDate(userStore.user?.created_at) }}
@@ -24,7 +33,7 @@
 
       <el-divider />
 
-      <h3>{{ t('profile.changePassword') }}</h3>
+      <h3>{{ t("profile.changePassword") }}</h3>
       <el-form
         :model="passwordForm"
         :rules="rules"
@@ -40,7 +49,10 @@
           />
         </el-form-item>
 
-        <el-form-item prop="confirmPassword" :label="t('profile.confirmPassword')">
+        <el-form-item
+          prop="confirmPassword"
+          :label="t('profile.confirmPassword')"
+        >
           <el-input
             v-model="passwordForm.confirmPassword"
             type="password"
@@ -54,7 +66,7 @@
             :loading="loading"
             @click="handleUpdatePassword"
           >
-            {{ t('profile.update') }}
+            {{ t("profile.update") }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -70,6 +82,7 @@ import type { FormInstance, FormItemRule, FormRules } from "element-plus";
 import { useUserStore } from "../stores/user";
 import { authAPI } from "../api/auth";
 import BackendStatus from "../components/BackendStatus.vue";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 
 const { t, locale } = useI18n();
 const userStore = useUserStore();
@@ -82,7 +95,11 @@ const passwordForm = reactive({
   confirmPassword: "",
 });
 
-const validateConfirmPassword = (_rule: any, value: string, callback: (err?: Error) => void) => {
+const validateConfirmPassword = (
+  _rule: any,
+  value: string,
+  callback: (err?: Error) => void
+) => {
   if (value !== passwordForm.password) {
     callback(new Error(t("messages.passwordMismatch")));
   } else {
@@ -92,27 +109,35 @@ const validateConfirmPassword = (_rule: any, value: string, callback: (err?: Err
 
 const rules: FormRules = {
   password: [
-    { required: true, message: t("auth.register.passwordRequired"), trigger: "blur" },
+    {
+      required: true,
+      message: t("auth.register.passwordRequired"),
+      trigger: "blur",
+    },
     { min: 6, message: t("auth.register.passwordRule"), trigger: "blur" },
   ],
   confirmPassword: [
-    { required: true, message: t("profile.confirmPasswordRequired"), trigger: "blur" },
+    {
+      required: true,
+      message: t("profile.confirmPasswordRequired"),
+      trigger: "blur",
+    },
     { validator: validateConfirmPassword, trigger: "blur" },
   ],
 };
 
 const toRuleArray = (rules: FormRules[string]): FormItemRule[] => {
-  if (!rules) return []
-  return Array.isArray(rules) ? [...rules] : [rules]
-}
+  if (!rules) return [];
+  return Array.isArray(rules) ? [...rules] : [rules];
+};
 
 watch(locale, () => {
   toRuleArray(rules.password).forEach((rule, index) => {
-    if (index === 0) rule.message = t('auth.register.passwordRequired');
-    if (index === 1) rule.message = t('auth.register.passwordRule');
+    if (index === 0) rule.message = t("auth.register.passwordRequired");
+    if (index === 1) rule.message = t("auth.register.passwordRule");
   });
   toRuleArray(rules.confirmPassword).forEach((rule, index) => {
-    if (index === 0) rule.message = t('profile.confirmPasswordRequired');
+    if (index === 0) rule.message = t("profile.confirmPasswordRequired");
   });
 });
 
@@ -148,9 +173,10 @@ const formatDate = (value?: string) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--color-bgSecondary);
   padding: var(--spacing-xl);
+  overflow: hidden;
 }
 
 .profile-card {
@@ -163,6 +189,12 @@ const formatDate = (value?: string) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
 }
 
 .card-header h2 {

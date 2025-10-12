@@ -4,8 +4,13 @@
       <div class="header-content">
         <h1 class="logo">{{ websiteName }}</h1>
         <nav class="nav">
-          <el-button @click="$router.push('/')">{{ t('common.actions.back') }}</el-button>
-          <el-button type="primary" @click="$router.push('/login')">{{ t('home.nav.login') }}</el-button>
+          <LanguageSwitcher />
+          <el-button @click="$router.push('/')">{{
+            t("common.actions.back")
+          }}</el-button>
+          <el-button type="primary" @click="$router.push('/login')">{{
+            t("home.nav.login")
+          }}</el-button>
         </nav>
       </div>
     </header>
@@ -17,8 +22,8 @@
             <Promotion />
           </el-icon>
           <h1>{{ websiteName }}</h1>
-          <p class="version">{{ t('about.version') }} {{ version }}</p>
-          <p class="description">{{ t('about.intro') }}</p>
+          <p class="version">{{ t("about.version") }} {{ version }}</p>
+          <p class="description">{{ t("about.intro") }}</p>
         </div>
       </section>
 
@@ -29,10 +34,10 @@
               <template #header>
                 <div class="card-header">
                   <el-icon :size="24"><InfoFilled /></el-icon>
-                  <span>{{ t('admin.settings.basic') }}</span>
+                  <span>{{ t("admin.settings.basic") }}</span>
                 </div>
               </template>
-              <p>{{ t('about.systemIntro') }}</p>
+              <p>{{ t("about.systemIntro") }}</p>
             </el-card>
           </el-col>
 
@@ -41,14 +46,14 @@
               <template #header>
                 <div class="card-header">
                   <el-icon :size="24"><Star /></el-icon>
-                  <span>{{ t('home.features.title') }}</span>
+                  <span>{{ t("home.features.title") }}</span>
                 </div>
               </template>
               <ul>
-                <li>{{ t('about.featureList.auth') }}</li>
-                <li>{{ t('about.featureList.chat') }}</li>
-                <li>{{ t('about.featureList.plan') }}</li>
-                <li>{{ t('about.featureList.security') }}</li>
+                <li>{{ t("about.featureList.auth") }}</li>
+                <li>{{ t("about.featureList.chat") }}</li>
+                <li>{{ t("about.featureList.plan") }}</li>
+                <li>{{ t("about.featureList.security") }}</li>
               </ul>
             </el-card>
           </el-col>
@@ -73,7 +78,7 @@
       </section>
 
       <section class="features-section">
-        <h2>{{ t('home.features.title') }}</h2>
+        <h2>{{ t("home.features.title") }}</h2>
         <el-timeline>
           <el-timeline-item
             v-for="feature in featureTimeline"
@@ -88,13 +93,17 @@
       </section>
 
       <section class="disclaimer-section">
-        <el-alert :title="t('about.disclaimer')" type="warning" :closable="false" />
+        <el-alert
+          :title="t('about.disclaimer')"
+          type="warning"
+          :closable="false"
+        />
       </section>
     </main>
 
     <footer class="footer">
       <div class="footer-content">
-        <p>&copy; 2024 {{ websiteName }}. {{ t('home.footer.terms') }}</p>
+        <p>&copy; 2024 {{ websiteName }}. {{ t("home.footer.terms") }}</p>
       </div>
     </footer>
 
@@ -117,6 +126,7 @@ import {
 } from "@element-plus/icons-vue";
 import api from "../api";
 import BackendStatus from "../components/BackendStatus.vue";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 
 const { t } = useI18n();
 
@@ -124,11 +134,36 @@ const websiteName = ref(t("common.appName"));
 const version = ref("1.0.0");
 
 const featureTimeline = [
-  { title: "about.featureList.auth", description: "about.featureList.auth", icon: User, color: "#409eff" },
-  { title: "about.featureList.chat", description: "about.featureList.chat", icon: ChatDotRound, color: "#67c23a" },
-  { title: "about.featureList.plan", description: "about.featureList.plan", icon: Star, color: "#e6a23c" },
-  { title: "about.featureList.security", description: "about.featureList.security", icon: Lock, color: "#909399" },
-  { title: "admin.menu.settings", description: "admin.settings.title", icon: Setting, color: "#f56c6c" }
+  {
+    title: "about.featureList.auth",
+    description: "about.featureList.auth",
+    icon: User,
+    color: "#409eff",
+  },
+  {
+    title: "about.featureList.chat",
+    description: "about.featureList.chat",
+    icon: ChatDotRound,
+    color: "#67c23a",
+  },
+  {
+    title: "about.featureList.plan",
+    description: "about.featureList.plan",
+    icon: Star,
+    color: "#e6a23c",
+  },
+  {
+    title: "about.featureList.security",
+    description: "about.featureList.security",
+    icon: Lock,
+    color: "#909399",
+  },
+  {
+    title: "admin.menu.settings",
+    description: "admin.settings.title",
+    icon: Setting,
+    color: "#f56c6c",
+  },
 ];
 
 onMounted(async () => {
@@ -143,15 +178,15 @@ onMounted(async () => {
 
 <style scoped>
 .about-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--color-bgSecondary);
+  overflow: hidden;
 }
 
 .header {
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
   z-index: 100;
   background: var(--color-bgPrimary);
   border-bottom: 1px solid var(--color-borderPrimary);
@@ -186,6 +221,8 @@ onMounted(async () => {
   width: 100%;
   margin: 0 auto;
   padding: var(--spacing-4xl) var(--spacing-xl);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .intro-section {
@@ -274,10 +311,10 @@ onMounted(async () => {
 }
 
 .footer {
+  flex-shrink: 0;
   background: var(--color-textPrimary);
   color: var(--color-white);
   padding: var(--spacing-2xl) var(--spacing-xl);
-  margin-top: auto;
 }
 
 .footer-content {

@@ -6,10 +6,14 @@
       <div class="sidebar-header">
         <div class="brand">
           <h2>{{ websiteName }}</h2>
-          <p class="brand-subtitle">{{ t('chat.sidebarTagline') }}</p>
+          <p class="brand-subtitle">{{ t("chat.sidebarTagline") }}</p>
         </div>
-        <el-button type="primary" @click="createNewConversation(true)" :icon="Plus">
-          {{ t('chat.newConversation') }}
+        <el-button
+          type="primary"
+          @click="createNewConversation(true)"
+          :icon="Plus"
+        >
+          {{ t("chat.newConversation") }}
         </el-button>
       </div>
 
@@ -35,9 +39,12 @@
                 size="small"
                 type="warning"
                 effect="plain"
-              >{{ t('common.status.disabled') }}</el-tag>
+                >{{ t("common.status.disabled") }}</el-tag
+              >
             </div>
-            <span class="conversation-time">{{ formatDate(conv.created_at) }}</span>
+            <span class="conversation-time">{{
+              formatDate(conv.created_at)
+            }}</span>
           </div>
           <div class="conversation-actions" @click.stop>
             <el-tooltip :content="t('common.actions.delete')" placement="top">
@@ -62,16 +69,16 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="$router.push('/profile')">
-                {{ t('chat.userMenu.profile') }}
+                {{ t("chat.userMenu.profile") }}
               </el-dropdown-item>
               <el-dropdown-item
                 v-if="userStore.isAdmin()"
                 @click="$router.push('/admin')"
               >
-                {{ t('chat.userMenu.admin') }}
+                {{ t("chat.userMenu.admin") }}
               </el-dropdown-item>
               <el-dropdown-item divided @click="handleLogout">
-                {{ t('chat.userMenu.logout') }}
+                {{ t("chat.userMenu.logout") }}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -82,14 +89,20 @@
     <main class="main-content">
       <div v-if="!currentConversationId" class="welcome">
         <div class="welcome-card">
-          <h1>{{ t('chat.welcomeTitle') }}</h1>
-          <p>{{ t('chat.welcomeSubtitle') }}</p>
+          <h1>{{ t("chat.welcomeTitle") }}</h1>
+          <p>{{ t("chat.welcomeSubtitle") }}</p>
           <div class="welcome-actions">
-            <el-button type="primary" size="large" @click="createNewConversation(true)">
+            <el-button
+              type="primary"
+              size="large"
+              @click="createNewConversation(true)"
+            >
               <el-icon><Plus /></el-icon>
-              {{ t('chat.newConversation') }}
+              {{ t("chat.newConversation") }}
             </el-button>
-            <el-button size="large" @click="loadConversations">{{ t('chat.refresh') }}</el-button>
+            <el-button size="large" @click="loadConversations">{{
+              t("chat.refresh")
+            }}</el-button>
           </div>
         </div>
       </div>
@@ -98,16 +111,25 @@
         <header class="chat-header">
           <div class="chat-title">
             <h1>{{ currentConversation?.title }}</h1>
-            <el-tag v-if="!currentConversation?.is_active" type="warning" effect="plain">
-              {{ t('common.status.disabled') }}
+            <el-tag
+              v-if="!currentConversation?.is_active"
+              type="warning"
+              effect="plain"
+            >
+              {{ t("common.status.disabled") }}
             </el-tag>
           </div>
           <div class="chat-actions">
-            <el-button text size="small" :icon="Refresh" @click="refreshConversation">
-              {{ t('chat.refresh') }}
+            <el-button
+              text
+              size="small"
+              :icon="Refresh"
+              @click="refreshConversation"
+            >
+              {{ t("chat.refresh") }}
             </el-button>
             <el-button text size="small" :icon="User" @click="openInfoDialog">
-              {{ t('chat.patientProfile') }}
+              {{ t("chat.patientProfile") }}
             </el-button>
           </div>
         </header>
@@ -115,32 +137,37 @@
         <section class="patient-info-card">
           <div class="card-header">
             <div>
-              <h3>{{ t('chat.patientProfile') }}</h3>
-              <p class="card-subtitle">{{ t('chat.patientProfileHint') }}</p>
+              <h3>{{ t("chat.patientProfile") }}</h3>
+              <p class="card-subtitle">{{ t("chat.patientProfileHint") }}</p>
             </div>
-            <el-button type="primary" text :icon="EditPen" @click="openInfoDialog">
-              {{ t('chat.updateInfo') }}
+            <el-button
+              type="primary"
+              text
+              :icon="EditPen"
+              @click="openInfoDialog"
+            >
+              {{ t("chat.updateInfo") }}
             </el-button>
           </div>
 
           <div v-if="hasPatientInfo" class="info-body">
             <el-descriptions :column="3" border size="small">
-              <el-descriptions-item label="{{ t('chat.age') }}">
-                {{ currentProfile.age || t('chat.fillInfo') }}
+              <el-descriptions-item :label="t('chat.age')">
+                {{ currentProfile.age || t("chat.fillInfo") }}
               </el-descriptions-item>
-              <el-descriptions-item label="{{ t('chat.gender') }}">
+              <el-descriptions-item :label="t('chat.gender')">
                 {{ genderLabel(currentProfile.gender) }}
               </el-descriptions-item>
-              <el-descriptions-item label="{{ t('chat.chiefComplaint') }}">
-                {{ currentProfile.mainComplaint || t('chat.fillInfo') }}
+              <el-descriptions-item :label="t('chat.chiefComplaint')">
+                {{ currentProfile.mainComplaint || t("chat.fillInfo") }}
               </el-descriptions-item>
             </el-descriptions>
           </div>
 
           <div v-else class="info-empty">
-            <el-empty description="{{ t('chat.fillInfo') }}">
+            <el-empty :description="t('chat.fillInfo')">
               <el-button type="primary" link @click="openInfoDialog">
-                {{ t('chat.fillInfo') }}
+                {{ t("chat.fillInfo") }}
               </el-button>
             </el-empty>
           </div>
@@ -173,7 +200,13 @@
           </div>
         </div>
 
-        <footer class="input-area" :class="{ 'disabled-conversation': currentConversation && !currentConversation.is_active }">
+        <footer
+          class="input-area"
+          :class="{
+            'disabled-conversation':
+              currentConversation && !currentConversation.is_active,
+          }"
+        >
           <el-alert
             v-if="currentConversation && !currentConversation.is_active"
             :title="t('chat.conversationDisabled')"
@@ -182,7 +215,7 @@
             class="mb-base"
           >
             <template #default>
-              <p>{{ t('chat.conversationDisabledDetail') }}</p>
+              <p>{{ t("chat.conversationDisabledDetail") }}</p>
               <el-button
                 type="primary"
                 size="small"
@@ -190,7 +223,7 @@
                 @click="createNewConversation(true)"
                 class="mt-sm"
               >
-                {{ t('chat.createNewConversation') }}
+                {{ t("chat.createNewConversation") }}
               </el-button>
             </template>
           </el-alert>
@@ -204,7 +237,7 @@
             @keydown.enter.ctrl.prevent="sendMessage"
           />
           <div class="input-actions">
-            <span class="tip">Ctrl + Enter {{ t('chat.send') }}</span>
+            <span class="tip">Ctrl + Enter {{ t("chat.send") }}</span>
             <div class="action-buttons">
               <el-button
                 text
@@ -213,15 +246,17 @@
                 @click="openInfoDialog"
                 :disabled="!currentConversation?.is_active"
               >
-                {{ t('chat.updateInfo') }}
+                {{ t("chat.updateInfo") }}
               </el-button>
               <el-button
                 type="primary"
                 :loading="isStreaming"
-                :disabled="!inputMessage.trim() || !currentConversation?.is_active"
+                :disabled="
+                  !inputMessage.trim() || !currentConversation?.is_active
+                "
                 @click="sendMessage"
               >
-                {{ t('chat.send') }}
+                {{ t("chat.send") }}
               </el-button>
             </div>
           </div>
@@ -231,22 +266,31 @@
 
     <el-dialog
       v-model="infoDialogVisible"
-      title="{{ t('chat.infoDialogTitle') }}"
+      :title="t('chat.infoDialogTitle')"
       width="520px"
       destroy-on-close
     >
-      <el-form ref="infoFormRef" :model="infoForm" :rules="infoRules" label-width="90px">
-        <el-form-item label="{{ t('chat.age') }}" prop="age">
-          <el-input v-model="infoForm.age" :placeholder="t('chat.age')" maxlength="3" />
+      <el-form
+        ref="infoFormRef"
+        :model="infoForm"
+        :rules="infoRules"
+        label-width="90px"
+      >
+        <el-form-item :label="t('chat.age')" prop="age">
+          <el-input
+            v-model="infoForm.age"
+            :placeholder="t('chat.age')"
+            maxlength="3"
+          />
         </el-form-item>
-        <el-form-item label="{{ t('chat.gender') }}" prop="gender">
+        <el-form-item :label="t('chat.gender')" prop="gender">
           <el-radio-group v-model="infoForm.gender">
-            <el-radio label="male">{{ t('chat.genderMale') }}</el-radio>
-            <el-radio label="female">{{ t('chat.genderFemale') }}</el-radio>
-            <el-radio label="other">{{ t('chat.genderOther') }}</el-radio>
+            <el-radio label="male">{{ t("chat.genderMale") }}</el-radio>
+            <el-radio label="female">{{ t("chat.genderFemale") }}</el-radio>
+            <el-radio label="other">{{ t("chat.genderOther") }}</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="{{ t('chat.chiefComplaint') }}" prop="mainComplaint">
+        <el-form-item :label="t('chat.chiefComplaint')" prop="mainComplaint">
           <el-input
             v-model="infoForm.mainComplaint"
             type="textarea"
@@ -259,15 +303,20 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="skipInfoDialog">{{ t('chat.infoSkip') }}</el-button>
-          <el-button text type="danger" @click="clearInfoForm">{{ t('chat.infoClear') }}</el-button>
-          <el-button type="primary" @click="savePatientInfo">{{ t('chat.infoSave') }}</el-button>
+          <el-button @click="skipInfoDialog">{{
+            t("chat.infoSkip")
+          }}</el-button>
+          <el-button text type="danger" @click="clearInfoForm">{{
+            t("chat.infoClear")
+          }}</el-button>
+          <el-button type="primary" @click="savePatientInfo">{{
+            t("chat.infoSave")
+          }}</el-button>
         </div>
       </template>
     </el-dialog>
   </div>
 </template>
-
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
@@ -372,8 +421,11 @@ const infoRules: FormRules = {
   ],
 };
 
-const currentConversation = computed(() =>
-  conversations.value.find((item) => item.id === currentConversationId.value) || null
+const currentConversation = computed(
+  () =>
+    conversations.value.find(
+      (item) => item.id === currentConversationId.value
+    ) || null
 );
 
 const currentProfile = computed<PatientProfile>(() => {
@@ -389,7 +441,9 @@ const currentProfile = computed<PatientProfile>(() => {
 
 const hasPatientInfo = computed(() => {
   const profile = currentProfile.value;
-  return [profile.age, profile.gender, profile.mainComplaint].some((v) => v && v.trim());
+  return [profile.age, profile.gender, profile.mainComplaint].some(
+    (v) => v && v.trim()
+  );
 });
 
 const genderLabel = (gender: string) => {
@@ -487,9 +541,11 @@ const savePatientInfo = async () => {
 
 const formatUserInfoForPrompt = (profile: PatientProfile) => {
   return [
-    `${t('chat.age')}: ${profile.age || t('chat.fillInfo')}`,
-    `${t('chat.gender')}: ${genderLabel(profile.gender)}`,
-    `${t('chat.chiefComplaint')}: ${profile.mainComplaint || t('chat.fillInfo')}`,
+    `${t("chat.age")}: ${profile.age || t("chat.fillInfo")}`,
+    `${t("chat.gender")}: ${genderLabel(profile.gender)}`,
+    `${t("chat.chiefComplaint")}: ${
+      profile.mainComplaint || t("chat.fillInfo")
+    }`,
   ].join("\n");
 };
 
@@ -539,11 +595,15 @@ const createNewConversation = async (promptInfo = false) => {
 
 const deleteConv = async (id: number) => {
   try {
-    await ElMessageBox.confirm(t("messages.deleteConversationConfirm"), t("messages.confirmTitle"), {
-      confirmButtonText: t("common.actions.confirm"),
-      cancelButtonText: t("common.actions.cancel"),
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      t("messages.deleteConversationConfirm"),
+      t("messages.confirmTitle"),
+      {
+        confirmButtonText: t("common.actions.confirm"),
+        cancelButtonText: t("common.actions.cancel"),
+        type: "warning",
+      }
+    );
 
     await chatAPI.deleteConversation(id);
     await loadConversations();
@@ -590,7 +650,10 @@ const sendMessage = async () => {
   };
   messages.value.push(tempMessage);
 
-  if (currentConversation.value && currentConversation.value.title === t("chat.newConversation")) {
+  if (
+    currentConversation.value &&
+    currentConversation.value.title === t("chat.newConversation")
+  ) {
     const preview = content.trim();
     if (preview) {
       currentConversation.value.title =
@@ -603,8 +666,12 @@ const sendMessage = async () => {
   isStreaming.value = true;
   streamingContent.value = "";
 
-  const existingUserMessages = messages.value.filter((msg) => msg.role === "user").length;
-  const attachInfoNow = shouldAttachUserInfo.value || (existingUserMessages === 1 && hasPatientInfo.value);
+  const existingUserMessages = messages.value.filter(
+    (msg) => msg.role === "user"
+  ).length;
+  const attachInfoNow =
+    shouldAttachUserInfo.value ||
+    (existingUserMessages === 1 && hasPatientInfo.value);
   const userInfoPayload = attachInfoNow
     ? formatUserInfoForPrompt(currentProfile.value)
     : undefined;
@@ -666,27 +733,33 @@ const handleLogout = () => {
 
 // 定期检查对话状态（检测模型切换）
 const checkConversationStatus = async () => {
-  if (!currentConversationId.value) return
+  if (!currentConversationId.value) return;
 
   try {
-    const res = await chatAPI.getConversations()
-    const currentConv = res.data.find((c) => c.id === currentConversationId.value)
+    const res = await chatAPI.getConversations();
+    const currentConv = res.data.find(
+      (c) => c.id === currentConversationId.value
+    );
 
-    if (currentConv && !currentConv.is_active && currentConversation.value?.is_active) {
+    if (
+      currentConv &&
+      !currentConv.is_active &&
+      currentConversation.value?.is_active
+    ) {
       // 对话被禁用了
       ElMessage.warning({
         message: t("chat.modelUpdatedNotice"),
         duration: 10000,
         showClose: true,
-      })
-      await loadConversations()
+      });
+      await loadConversations();
     }
   } catch (error) {
-    console.error("Failed to check conversation status:", error)
+    console.error("Failed to check conversation status:", error);
   }
-}
+};
 
-let statusCheckInterval: number | null = null
+let statusCheckInterval: number | null = null;
 
 onMounted(async () => {
   restoreProfiles();
@@ -710,16 +783,16 @@ onMounted(async () => {
   await loadConversations();
 
   // 每30秒检查一次对话状态
-  statusCheckInterval = window.setInterval(checkConversationStatus, 30000)
+  statusCheckInterval = window.setInterval(checkConversationStatus, 30000);
 });
 
 // 组件卸载时清除定时器
-import { onUnmounted } from 'vue'
+import { onUnmounted } from "vue";
 onUnmounted(() => {
   if (statusCheckInterval !== null) {
-    clearInterval(statusCheckInterval)
+    clearInterval(statusCheckInterval);
   }
-})
+});
 </script>
 
 <style scoped>
@@ -855,7 +928,11 @@ onUnmounted(() => {
 }
 
 .welcome-card {
-  background: linear-gradient(135deg, rgba(240, 160, 75, 0.12), rgba(240, 160, 75, 0.22));
+  background: linear-gradient(
+    135deg,
+    rgba(240, 160, 75, 0.12),
+    rgba(240, 160, 75, 0.22)
+  );
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-4xl);
   text-align: center;
@@ -949,7 +1026,11 @@ onUnmounted(() => {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-xl) var(--spacing-2xl);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 229, 204, 0.25));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(245, 229, 204, 0.25)
+  );
 }
 
 .message {

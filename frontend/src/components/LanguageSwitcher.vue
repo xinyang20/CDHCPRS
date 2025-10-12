@@ -35,29 +35,14 @@ const selectedLocale = computed({
 
 <style scoped>
 .language-switcher {
-  position: fixed;
-  bottom: var(--spacing-xl);
-  left: var(--spacing-xl);
-  z-index: 1100;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: var(--border-radius-full);
-  padding: 4px 12px;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
-  backdrop-filter: blur(12px);
+  position: static;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .language-select {
-  width: 130px;
-}
-
-@media (max-width: 768px) {
-  .language-switcher {
-    bottom: var(--spacing-base);
-    left: var(--spacing-base);
-  }
-
-  .language-select {
-    width: 110px;
-  }
+  width: 110px;
 }
 </style>

@@ -4,10 +4,19 @@
       <div class="header-content">
         <h1 class="logo">{{ websiteName }}</h1>
         <nav class="nav">
-          <el-button text @click="scrollToSection('features')">{{ t('home.nav.features') }}</el-button>
-          <el-button text @click="scrollToSection('about')">{{ t('home.nav.about') }}</el-button>
-          <el-button @click="$router.push('/login')">{{ t('home.nav.login') }}</el-button>
-          <el-button type="primary" @click="$router.push('/register')">{{ t('home.nav.register') }}</el-button>
+          <LanguageSwitcher />
+          <el-button text @click="scrollToSection('features')">{{
+            t("home.nav.features")
+          }}</el-button>
+          <el-button text @click="scrollToSection('about')">{{
+            t("home.nav.about")
+          }}</el-button>
+          <el-button @click="$router.push('/login')">{{
+            t("home.nav.login")
+          }}</el-button>
+          <el-button type="primary" @click="$router.push('/register')">{{
+            t("home.nav.register")
+          }}</el-button>
         </nav>
       </div>
     </header>
@@ -15,23 +24,27 @@
     <main class="main-content">
       <section class="hero-section">
         <div class="hero-content">
-          <h1 class="hero-title">{{ t('home.hero.title') }}</h1>
-          <p class="hero-subtitle">{{ t('home.hero.subtitle') }}</p>
+          <h1 class="hero-title">{{ t("home.hero.title") }}</h1>
+          <p class="hero-subtitle">{{ t("home.hero.subtitle") }}</p>
           <div class="hero-actions">
-            <el-button type="primary" size="large" @click="$router.push('/register')">
+            <el-button
+              type="primary"
+              size="large"
+              @click="$router.push('/register')"
+            >
               <el-icon><UserFilled /></el-icon>
-              {{ t('home.hero.cta') }}
+              {{ t("home.hero.cta") }}
             </el-button>
             <el-button size="large" @click="$router.push('/login')">
               <el-icon><Right /></el-icon>
-              {{ t('home.hero.ctaExisting') }}
+              {{ t("home.hero.ctaExisting") }}
             </el-button>
           </div>
         </div>
       </section>
 
       <section id="features" class="features-section">
-        <h2 class="section-title">{{ t('home.features.title') }}</h2>
+        <h2 class="section-title">{{ t("home.features.title") }}</h2>
         <div class="features-grid">
           <div
             v-for="feature in featureCards"
@@ -48,14 +61,14 @@
       </section>
 
       <section id="about" class="about-section">
-        <h2 class="section-title">{{ t('home.about.title') }}</h2>
+        <h2 class="section-title">{{ t("home.about.title") }}</h2>
         <div class="about-content">
           <div class="about-text">
-            <h3>{{ t('home.about.heading') }}</h3>
-            <p>{{ t('home.about.description1') }}</p>
-            <p>{{ t('home.about.description2') }}</p>
+            <h3>{{ t("home.about.heading") }}</h3>
+            <p>{{ t("home.about.description1") }}</p>
+            <p>{{ t("home.about.description2") }}</p>
             <el-button type="primary" @click="$router.push('/about')">
-              {{ t('home.about.more') }}
+              {{ t("home.about.more") }}
               <el-icon><Right /></el-icon>
             </el-button>
           </div>
@@ -70,10 +83,12 @@
 
     <footer class="footer">
       <div class="footer-content">
-        <p>&copy; 2024 {{ websiteName }}. {{ t('home.footer.terms') }}</p>
+        <p>&copy; 2024 {{ websiteName }}. {{ t("home.footer.terms") }}</p>
         <div class="footer-links">
-          <el-button text @click="$router.push('/about')">{{ t('home.footer.privacy') }}</el-button>
-          <el-button text>{{ t('home.footer.terms') }}</el-button>
+          <el-button text @click="$router.push('/about')">{{
+            t("home.footer.privacy")
+          }}</el-button>
+          <el-button text>{{ t("home.footer.terms") }}</el-button>
         </div>
       </div>
     </footer>
@@ -98,18 +113,43 @@ import {
 } from "@element-plus/icons-vue";
 import api from "../api";
 import BackendStatus from "../components/BackendStatus.vue";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 
 const { t } = useI18n();
 
 const websiteName = ref(t("common.appName"));
 
 const featureCards = [
-  { icon: ChatDotRound, titleKey: "home.features.cards.chat.title", descriptionKey: "home.features.cards.chat.description" },
-  { icon: Document, titleKey: "home.features.cards.plan.title", descriptionKey: "home.features.cards.plan.description" },
-  { icon: DataAnalysis, titleKey: "home.features.cards.analysis.title", descriptionKey: "home.features.cards.analysis.description" },
-  { icon: Lock, titleKey: "home.features.cards.privacy.title", descriptionKey: "home.features.cards.privacy.description" },
-  { icon: Clock, titleKey: "home.features.cards.service.title", descriptionKey: "home.features.cards.service.description" },
-  { icon: Star, titleKey: "home.features.cards.reliable.title", descriptionKey: "home.features.cards.reliable.description" }
+  {
+    icon: ChatDotRound,
+    titleKey: "home.features.cards.chat.title",
+    descriptionKey: "home.features.cards.chat.description",
+  },
+  {
+    icon: Document,
+    titleKey: "home.features.cards.plan.title",
+    descriptionKey: "home.features.cards.plan.description",
+  },
+  {
+    icon: DataAnalysis,
+    titleKey: "home.features.cards.analysis.title",
+    descriptionKey: "home.features.cards.analysis.description",
+  },
+  {
+    icon: Lock,
+    titleKey: "home.features.cards.privacy.title",
+    descriptionKey: "home.features.cards.privacy.description",
+  },
+  {
+    icon: Clock,
+    titleKey: "home.features.cards.service.title",
+    descriptionKey: "home.features.cards.service.description",
+  },
+  {
+    icon: Star,
+    titleKey: "home.features.cards.reliable.title",
+    descriptionKey: "home.features.cards.reliable.description",
+  },
 ];
 
 const scrollToSection = (sectionId: string) => {
@@ -131,15 +171,15 @@ onMounted(async () => {
 
 <style scoped>
 .home-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--color-bgPrimary);
+  overflow: hidden;
 }
 
 .header {
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
   z-index: 100;
   background: var(--color-bgPrimary);
   border-bottom: 1px solid var(--color-borderPrimary);
@@ -170,10 +210,16 @@ onMounted(async () => {
 
 .main-content {
   flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .hero-section {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primaryLight) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primaryLight) 100%
+  );
   padding: var(--spacing-5xl) var(--spacing-xl);
   text-align: center;
 }
@@ -297,16 +343,15 @@ onMounted(async () => {
 }
 
 .footer {
+  flex-shrink: 0;
   background: var(--color-textPrimary);
   color: var(--color-white);
   padding: var(--spacing-2xl) var(--spacing-xl);
-  margin-top: auto;
 }
 
 .footer-content {
   max-width: 1280px;
-  margin: 0
-  auto;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;

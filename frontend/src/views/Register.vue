@@ -1,9 +1,12 @@
 <template>
   <div class="auth-container">
+    <div class="language-switcher-wrapper">
+      <LanguageSwitcher />
+    </div>
     <el-card class="auth-card">
       <template #header>
         <div class="card-header">
-          <h2>{{ t('auth.register.title') }}</h2>
+          <h2>{{ t("auth.register.title") }}</h2>
         </div>
       </template>
 
@@ -36,7 +39,7 @@
             :loading="loading"
             @click="handleRegister"
           >
-            {{ t('auth.register.submit') }}
+            {{ t("auth.register.submit") }}
           </el-button>
         </el-form-item>
 
@@ -46,7 +49,7 @@
             class="full-width"
             @click="$router.push('/login')"
           >
-            {{ t('auth.register.back') }}
+            {{ t("auth.register.back") }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -61,6 +64,7 @@ import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import type { FormInstance, FormItemRule, FormRules } from "element-plus";
 import { authAPI } from "../api/auth";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -75,28 +79,41 @@ const registerForm = reactive({
 
 const rules: FormRules = {
   username: [
-    { required: true, message: t("auth.register.usernameRequired"), trigger: "blur" },
-    { min: 3, max: 50, message: t("auth.register.usernameRule"), trigger: "blur" }
+    {
+      required: true,
+      message: t("auth.register.usernameRequired"),
+      trigger: "blur",
+    },
+    {
+      min: 3,
+      max: 50,
+      message: t("auth.register.usernameRule"),
+      trigger: "blur",
+    },
   ],
   password: [
-    { required: true, message: t("auth.register.passwordRequired"), trigger: "blur" },
-    { min: 6, message: t("auth.register.passwordRule"), trigger: "blur" }
+    {
+      required: true,
+      message: t("auth.register.passwordRequired"),
+      trigger: "blur",
+    },
+    { min: 6, message: t("auth.register.passwordRule"), trigger: "blur" },
   ],
 };
 
 const toRuleArray = (rules: FormRules[string]): FormItemRule[] => {
-  if (!rules) return []
-  return Array.isArray(rules) ? [...rules] : [rules]
-}
+  if (!rules) return [];
+  return Array.isArray(rules) ? [...rules] : [rules];
+};
 
 watch(locale, () => {
   toRuleArray(rules.username).forEach((rule, index) => {
-    if (index === 0) rule.message = t('auth.register.usernameRequired');
-    if (index === 1) rule.message = t('auth.register.usernameRule');
+    if (index === 0) rule.message = t("auth.register.usernameRequired");
+    if (index === 1) rule.message = t("auth.register.usernameRule");
   });
   toRuleArray(rules.password).forEach((rule, index) => {
-    if (index === 0) rule.message = t('auth.register.passwordRequired');
-    if (index === 1) rule.message = t('auth.register.passwordRule');
+    if (index === 0) rule.message = t("auth.register.passwordRequired");
+    if (index === 1) rule.message = t("auth.register.passwordRule");
   });
 });
 
@@ -123,6 +140,7 @@ const handleRegister = async () => {
 <style scoped>
 .auth-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -132,6 +150,14 @@ const handleRegister = async () => {
     var(--color-primary) 0%,
     var(--color-primaryLight) 100%
   );
+  overflow: hidden;
+  position: relative;
+}
+
+.language-switcher-wrapper {
+  position: absolute;
+  top: var(--spacing-xl);
+  right: var(--spacing-xl);
 }
 
 .auth-card {

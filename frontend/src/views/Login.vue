@@ -1,10 +1,13 @@
 <template>
   <div class="auth-container">
+    <div class="language-switcher-wrapper">
+      <LanguageSwitcher />
+    </div>
     <el-card class="auth-card">
       <template #header>
         <div class="card-header">
           <h2>{{ websiteName }}</h2>
-          <p>{{ t('auth.login.title') }}</p>
+          <p>{{ t("auth.login.title") }}</p>
         </div>
       </template>
 
@@ -37,7 +40,7 @@
             :loading="loading"
             @click="handleLogin"
           >
-            {{ t('auth.login.submit') }}
+            {{ t("auth.login.submit") }}
           </el-button>
         </el-form-item>
 
@@ -47,7 +50,7 @@
             class="full-width"
             @click="$router.push('/register')"
           >
-            {{ t('auth.login.register') }}
+            {{ t("auth.login.register") }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -64,6 +67,7 @@ import type { FormInstance, FormRules } from "element-plus";
 import { authAPI } from "../api/auth";
 import { useUserStore } from "../stores/user";
 import api from "../api";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -79,8 +83,20 @@ const loginForm = reactive({
 });
 
 const rules: FormRules = {
-  username: [{ required: true, message: t("auth.login.usernameRequired"), trigger: "blur" }],
-  password: [{ required: true, message: t("auth.login.passwordRequired"), trigger: "blur" }],
+  username: [
+    {
+      required: true,
+      message: t("auth.login.usernameRequired"),
+      trigger: "blur",
+    },
+  ],
+  password: [
+    {
+      required: true,
+      message: t("auth.login.passwordRequired"),
+      trigger: "blur",
+    },
+  ],
 };
 
 const handleLogin = async () => {
@@ -121,6 +137,7 @@ onMounted(async () => {
 <style scoped>
 .auth-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -130,6 +147,14 @@ onMounted(async () => {
     var(--color-primary) 0%,
     var(--color-primaryLight) 100%
   );
+  overflow: hidden;
+  position: relative;
+}
+
+.language-switcher-wrapper {
+  position: absolute;
+  top: var(--spacing-xl);
+  right: var(--spacing-xl);
 }
 
 .auth-card {

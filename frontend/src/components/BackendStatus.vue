@@ -1,9 +1,16 @@
 <template>
-  <div class="backend-status" :class="{ 'status-error': !isHealthy }">
+  <div
+    class="backend-status"
+    :class="{ 'status-error': !isHealthy, expanded: isExpanded }"
+    @mouseenter="isExpanded = true"
+    @mouseleave="isExpanded = false"
+  >
     <el-tooltip :content="tooltipContent" placement="top">
       <div class="status-indicator">
         <div class="status-dot" :class="statusClass"></div>
-        <span class="status-text">{{ statusText }}</span>
+        <transition name="fade-slide">
+          <span v-if="isExpanded" class="status-text">{{ statusText }}</span>
+        </transition>
       </div>
     </el-tooltip>
   </div>
@@ -20,6 +27,7 @@ const isHealthy = ref(true);
 const lastCheckTime = ref<Date | null>(null);
 const checkInterval = ref<number | null>(null);
 const errorMessage = ref("");
+const isExpanded = ref(false);
 
 const HEALTH_CHECK_INTERVAL = 30000;
 
@@ -38,8 +46,11 @@ const tooltipContent = computed(() => {
     const last = lastCheckTime.value;
     if (last) {
       const time = last.toLocaleTimeString(locale.value);
-      return `${t("statusMessages.backendOkDetail")}` + `
-${t("statusMessages.lastCheck", { time })}`;
+      return (
+        `${t("statusMessages.backendOkDetail")}` +
+        `
+${t("statusMessages.lastCheck", { time })}`
+      );
     }
     return t("statusMessages.backendOkDetail");
   }
@@ -64,7 +75,9 @@ const checkHealth = async () => {
     if (error.code === "ECONNABORTED") {
       errorMessage.value = t("statusMessages.backendErrorDetail");
     } else if (error.response) {
-      errorMessage.value = `${t("statusMessages.backendErrorDetail")}: ${error.response.status}`;
+      errorMessage.value = `${t("statusMessages.backendErrorDetail")}: ${
+        error.response.status
+      }`;
     } else if (error.request) {
       errorMessage.value = t("statusMessages.backendErrorDetail");
     } else {
@@ -106,14 +119,19 @@ onUnmounted(() => {
   z-index: 1000;
   background: var(--color-bgPrimary);
   border-radius: var(--border-radius-full);
-  padding: var(--spacing-sm) var(--spacing-base);
+  padding: var(--spacing-sm);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all var(--transition-base);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.backend-status:hover {
+.backend-status.expanded {
+  padding: var(--spacing-sm) var(--spacing-base);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-  transform: translateY(-2px);
 }
 
 .status-indicator {
@@ -121,6 +139,7 @@ onUnmounted(() => {
   align-items: center;
   gap: var(--spacing-sm);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .status-dot {
@@ -185,11 +204,26 @@ onUnmounted(() => {
   color: var(--color-danger);
 }
 
+/* 淡入淡出滑动动画 */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
 @media (max-width: 768px) {
   .backend-status {
     bottom: var(--spacing-base);
     right: var(--spacing-base);
-    padding: var(--spacing-xs) var(--spacing-sm);
   }
 }
 </style>

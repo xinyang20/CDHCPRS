@@ -151,15 +151,58 @@
           </div>
 
           <div v-if="hasPatientInfo" class="info-body">
-            <el-descriptions :column="3" border size="small">
+            <el-descriptions :column="2" border size="small">
               <el-descriptions-item :label="t('chat.age')">
                 {{ currentProfile.age || t("chat.fillInfo") }}
               </el-descriptions-item>
               <el-descriptions-item :label="t('chat.gender')">
                 {{ genderLabel(currentProfile.gender) }}
               </el-descriptions-item>
-              <el-descriptions-item :label="t('chat.chiefComplaint')">
-                {{ currentProfile.mainComplaint || t("chat.fillInfo") }}
+              <el-descriptions-item
+                v-if="currentProfile.diseases && currentProfile.diseases.length > 0"
+                :label="t('chat.diseaseHistory')"
+                :span="2"
+              >
+                <el-tag
+                  v-for="diseaseId in currentProfile.diseases"
+                  :key="diseaseId"
+                  type="warning"
+                  size="small"
+                  class="disease-tag"
+                >
+                  {{ DISEASES.find(d => d.id === diseaseId)?.name }}
+                </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item
+                v-if="currentProfile.symptoms && currentProfile.symptoms.length > 0"
+                :label="t('chat.recentSymptoms')"
+                :span="2"
+              >
+                <el-tag
+                  v-for="symptom in currentProfile.symptoms"
+                  :key="symptom"
+                  type="info"
+                  size="small"
+                  class="symptom-tag-display"
+                >
+                  {{ symptom }}
+                </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item
+                v-if="currentProfile.tcmSyndrome"
+                :label="t('chat.tcmSyndrome')"
+                :span="2"
+              >
+                <el-tag type="success" effect="dark" size="small">
+                  {{ currentProfile.tcmSyndrome }}
+                </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item
+                v-if="currentProfile.mainComplaint"
+                :label="t('chat.chiefComplaint')"
+                :span="2"
+              >
+                {{ currentProfile.mainComplaint }}
               </el-descriptions-item>
             </el-descriptions>
           </div>
@@ -290,6 +333,58 @@
             <el-radio label="other">{{ t("chat.genderOther") }}</el-radio>
           </el-radio-group>
         </el-form-item>
+
+        <el-form-item :label="t('chat.diseaseHistory')" prop="diseases">
+          <el-checkbox-group v-model="infoForm.diseases" class="disease-checkboxes">
+            <el-checkbox
+              v-for="disease in DISEASES"
+              :key="disease.id"
+              :label="disease.id"
+              border
+              class="disease-checkbox-item"
+            >
+              {{ disease.name }}
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+
+        <el-form-item
+          v-if="infoForm.diseases && infoForm.diseases.length > 0"
+          :label="t('chat.recentSymptoms')"
+          prop="symptoms"
+        >
+          <div class="symptoms-container">
+            <el-tag
+              v-for="symptom in availableSymptoms"
+              :key="symptom.id"
+              :type="infoForm.symptoms?.includes(symptom.name) ? 'primary' : 'info'"
+              :effect="infoForm.symptoms?.includes(symptom.name) ? 'dark' : 'plain'"
+              @click="toggleSymptom(symptom.name)"
+              class="symptom-tag"
+            >
+              {{ symptom.name }}
+            </el-tag>
+          </div>
+        </el-form-item>
+
+        <el-form-item
+          v-if="infoForm.tcmSyndrome"
+          :label="t('chat.tcmSyndrome')"
+        >
+          <el-alert
+            :title="infoForm.tcmSyndrome"
+            type="success"
+            :closable="false"
+            show-icon
+          >
+            <template #default>
+              <p style="font-size: 12px; margin: 0;">
+                {{ t('chat.tcmSyndromeHint') }}
+              </p>
+            </template>
+          </el-alert>
+        </el-form-item>
+
         <el-form-item :label="t('chat.chiefComplaint')" prop="mainComplaint">
           <el-input
             v-model="infoForm.mainComplaint"
@@ -339,6 +434,11 @@ import { chatAPI } from "../api/chat";
 import { useUserStore } from "../stores/user";
 import BackendStatus from "../components/BackendStatus.vue";
 import MarkdownRenderer from "../components/MarkdownRenderer.vue";
+import {
+  DISEASES,
+  getSymptomsByDiseases,
+  inferTcmSyndrome,
+} from "../constants/medicalData";
 
 interface ConversationItem {
   id: number;
@@ -360,6 +460,9 @@ interface PatientProfile {
   age: string;
   gender: string;
   mainComplaint: string;
+  diseases: string[];  // 疾病历史（疾病ID列表）
+  symptoms: string[];  // 近期症状（症状名称列表）
+  tcmSyndrome?: string;  // 前端推断的中医证型
 }
 
 const PROFILE_STORAGE_KEY = "cdhcprs_conversation_profiles";
@@ -368,6 +471,9 @@ const buildDefaultProfile = (): PatientProfile => ({
   age: "",
   gender: "",
   mainComplaint: "",
+  diseases: [],
+  symptoms: [],
+  tcmSyndrome: undefined,
 });
 
 const router = useRouter();
@@ -443,8 +549,28 @@ const hasPatientInfo = computed(() => {
   const profile = currentProfile.value;
   return [profile.age, profile.gender, profile.mainComplaint].some(
     (v) => v && v.trim()
-  );
+  ) || profile.diseases.length > 0 || profile.symptoms.length > 0;
 });
+
+// 根据选择的疾病动态过滤症状列表
+const availableSymptoms = computed(() => {
+  if (infoForm.diseases && infoForm.diseases.length > 0) {
+    return getSymptomsByDiseases(infoForm.diseases);
+  }
+  return [];
+});
+
+// 实时推断中医证型
+watch(
+  () => [infoForm.diseases, infoForm.symptoms],
+  () => {
+    if (infoForm.diseases && infoForm.symptoms) {
+      const syndrome = inferTcmSyndrome(infoForm.diseases, infoForm.symptoms);
+      infoForm.tcmSyndrome = syndrome || undefined;
+    }
+  },
+  { deep: true }
+);
 
 const genderLabel = (gender: string) => {
   if (gender === "male") return t("chat.genderMale");
@@ -518,6 +644,18 @@ const clearInfoForm = () => {
   Object.assign(infoForm, buildDefaultProfile());
 };
 
+const toggleSymptom = (symptomName: string) => {
+  if (!infoForm.symptoms) {
+    infoForm.symptoms = [];
+  }
+  const index = infoForm.symptoms.indexOf(symptomName);
+  if (index > -1) {
+    infoForm.symptoms.splice(index, 1);
+  } else {
+    infoForm.symptoms.push(symptomName);
+  }
+};
+
 const savePatientInfo = async () => {
   if (!currentConversationId.value) {
     ElMessage.warning(t("messages.needSelectConversation"));
@@ -532,6 +670,9 @@ const savePatientInfo = async () => {
       age: infoForm.age.trim(),
       gender: infoForm.gender,
       mainComplaint: infoForm.mainComplaint.trim(),
+      diseases: infoForm.diseases || [],
+      symptoms: infoForm.symptoms || [],
+      tcmSyndrome: infoForm.tcmSyndrome,
     };
     infoDialogVisible.value = false;
     shouldAttachUserInfo.value = true;
@@ -540,13 +681,41 @@ const savePatientInfo = async () => {
 };
 
 const formatUserInfoForPrompt = (profile: PatientProfile) => {
-  return [
-    `${t("chat.age")}: ${profile.age || t("chat.fillInfo")}`,
-    `${t("chat.gender")}: ${genderLabel(profile.gender)}`,
-    `${t("chat.chiefComplaint")}: ${
-      profile.mainComplaint || t("chat.fillInfo")
-    }`,
-  ].join("\n");
+  const parts: string[] = [];
+
+  // 基本信息
+  if (profile.age) {
+    parts.push(`${t("chat.age")}: ${profile.age}岁`);
+  }
+  if (profile.gender) {
+    parts.push(`${t("chat.gender")}: ${genderLabel(profile.gender)}`);
+  }
+
+  // 疾病历史
+  if (profile.diseases && profile.diseases.length > 0) {
+    const diseaseNames = profile.diseases
+      .map((id) => DISEASES.find((d) => d.id === id)?.name)
+      .filter(Boolean)
+      .join('、');
+    parts.push(`${t("chat.diseaseHistory")}: ${diseaseNames}`);
+  }
+
+  // 近期症状
+  if (profile.symptoms && profile.symptoms.length > 0) {
+    parts.push(`${t("chat.recentSymptoms")}: ${profile.symptoms.join('、')}`);
+  }
+
+  // 中医证型（前端推断）
+  if (profile.tcmSyndrome) {
+    parts.push(`${t("chat.tcmSyndrome")}（初步分析）: ${profile.tcmSyndrome}`);
+  }
+
+  // 主诉
+  if (profile.mainComplaint) {
+    parts.push(`${t("chat.chiefComplaint")}: ${profile.mainComplaint}`);
+  }
+
+  return parts.length > 0 ? `\n【患者信息】\n${parts.join("\n")}` : "";
 };
 
 const loadConversations = async () => {
@@ -918,6 +1087,8 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.96);
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  min-height: 0;
 }
 
 .welcome {
@@ -961,6 +1132,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }
 
 .chat-header {
@@ -970,6 +1142,7 @@ onUnmounted(() => {
   align-items: center;
   border-bottom: 1px solid var(--color-borderPrimary);
   background: rgba(255, 255, 255, 0.95);
+  flex-shrink: 0;
 }
 
 .chat-title {
@@ -993,6 +1166,9 @@ onUnmounted(() => {
   padding: var(--spacing-xl) var(--spacing-2xl);
   border-bottom: 1px solid var(--color-borderLight);
   background: rgba(255, 255, 255, 0.9);
+  flex-shrink: 0;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .patient-info-card .card-header {
@@ -1022,15 +1198,24 @@ onUnmounted(() => {
   margin-top: var(--spacing-lg);
 }
 
+.disease-tag,
+.symptom-tag-display {
+  margin-right: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
 .message-list {
-  flex: 1;
+  flex: 1 1 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: var(--spacing-xl) var(--spacing-2xl);
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.95),
     rgba(245, 229, 204, 0.25)
   );
+  min-height: 0;
+  height: 0;
 }
 
 .message {
@@ -1097,8 +1282,7 @@ onUnmounted(() => {
   padding: var(--spacing-xl) var(--spacing-2xl);
   border-top: 1px solid var(--color-borderPrimary);
   background: rgba(255, 255, 255, 0.95);
-  position: sticky;
-  bottom: 0;
+  flex-shrink: 0;
   transition: all 0.3s ease;
 }
 
@@ -1142,6 +1326,52 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* 疾病历史选择器样式 */
+.disease-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.disease-checkbox-item {
+  margin: 0 !important;
+  min-width: 140px;
+}
+
+.disease-checkbox-item :deep(.el-checkbox__label) {
+  font-size: var(--font-size-sm);
+}
+
+/* 症状标签容器 */
+.symptoms-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  max-height: 200px;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+  background: rgba(240, 160, 75, 0.05);
+  border-radius: var(--border-radius-md);
+  border: 1px dashed var(--color-borderLight);
+}
+
+.symptom-tag {
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-sm);
+}
+
+.symptom-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(240, 160, 75, 0.2);
+}
+
+.symptom-tag:active {
+  transform: translateY(0);
 }
 
 @keyframes rotate {

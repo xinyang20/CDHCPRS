@@ -58,7 +58,16 @@ git clone https://github.com/xinyang20/CDHCPRS.git
 cd CDHCPRS
 ```
 
-#### 2. 后端设置
+#### 2. 配置环境变量
+
+```bash
+# 在项目根目录配置环境变量
+cp .env.example .env
+# 编辑 .env 文件，设置 SECRET_KEY 等配置
+# 可以自定义前后端端口：BACKEND_PORT、FRONTEND_PORT
+```
+
+#### 3. 后端设置
 
 ```bash
 # 进入后端目录
@@ -67,20 +76,19 @@ cd backend
 # 安装依赖（使用 uv）
 uv sync
 
-# 配置环境变量
-cp .env.example .env
-# 编辑 .env 文件，设置 SECRET_KEY 等配置
-
 # 初始化数据库
 uv run python init_db.py
 
-# 启动后端服务
-uv run uvicorn main:app --reload --host 127.0.0.1 --port 8001
+# 启动后端服务（推荐方式：自动从 .env 读取配置）
+uv run python run.py
+
+# 或使用传统方式（需要手动指定端口）
+# uv run uvicorn main:app --reload --host 127.0.0.1 --port 8001
 ```
 
-后端服务将在 http://127.0.0.1:8001 启动
+后端服务将在 http://127.0.0.1:8001 启动（可在 .env 中修改端口）
 
-#### 3. 前端设置
+#### 4. 前端设置
 
 ```bash
 # 进入前端目录
@@ -89,11 +97,11 @@ cd frontend
 # 安装依赖
 pnpm install
 
-# 启动开发服务器
+# 启动开发服务器（自动从 .env 读取端口配置）
 pnpm run dev
 ```
 
-前端服务将在 http://localhost:5173 启动
+前端服务将在 http://localhost:5173 启动（可在 .env 中修改端口）
 
 ### 默认账户
 
@@ -127,9 +135,17 @@ pnpm run dev
 
 ## 配置说明
 
-### 后端配置 (.env)
+### 环境变量配置 (.env)
+
+所有配置统一在项目根目录的 `.env` 文件中管理：
 
 ```env
+# 服务器端口配置
+BACKEND_HOST=127.0.0.1        # 后端服务器地址
+BACKEND_PORT=8001              # 后端服务器端口
+FRONTEND_PORT=5173             # 前端开发服务器端口
+VITE_API_BASE_URL=http://127.0.0.1:8001  # 前端 API 地址（开发环境）
+
 # 数据库配置
 DATABASE_URL=sqlite:///./cdhcprs.db
 
@@ -140,7 +156,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 # 应用配置
 APP_NAME=慢性病诊疗方案推荐系统
+DEBUG=True
 ```
+
+**重要提示：**
+- 首次使用请复制 `.env.example` 为 `.env`
+- 必须修改 `SECRET_KEY` 为随机字符串
+- 修改端口后需要重启服务
+- 生产环境请将 `DEBUG` 设置为 `False`，`VITE_API_BASE_URL` 留空
 
 ### LLM 配置
 
@@ -201,25 +224,46 @@ APP_NAME=慢性病诊疗方案推荐系统
 ### 后端开发
 
 ```bash
+# 进入后端目录
+cd backend
+
 # 安装新依赖
 uv add <package-name>
 
-# 运行开发服务器
-uv run uvicorn main:app --reload --host 127.0.0.1 --port 8001
+# 运行开发服务器（推荐）
+uv run python run.py
+
+# 或使用 uvicorn（需要手动指定端口）
+# uv run uvicorn main:app --reload --host 127.0.0.1 --port 8001
 ```
 
 ### 前端开发
 
 ```bash
+# 进入前端目录
+cd frontend
+
 # 安装新依赖
 pnpm install <package-name>
 
-# 运行开发服务器
+# 运行开发服务器（自动读取 .env 中的端口配置）
 pnpm run dev
 
 # 构建生产版本
 pnpm run build
 ```
+
+### 修改端口
+
+如需修改前后端端口，只需编辑项目根目录的 `.env` 文件：
+
+```env
+BACKEND_PORT=8001      # 修改后端端口
+FRONTEND_PORT=5173     # 修改前端端口
+VITE_API_BASE_URL=http://127.0.0.1:8001  # 同步修改前端 API 地址
+```
+
+修改后重启服务即可生效。
 
 ## 许可证
 

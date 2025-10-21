@@ -130,7 +130,11 @@
     "ageError": "Please enter an integer between 0 and 120",
     "chiefComplaintError": "Please provide at least 4 characters",
     "assistantLabel": "Assistant",
-    "userLabel": "User"
+    "userLabel": "User",
+    "diseaseHistory": "Disease History",
+    "recentSymptoms": "Recent Symptoms",
+    "tcmSyndrome": "TCM Syndrome",
+    "tcmSyndromeHint": "Inferred from symptoms for AI reference"
   },
   "admin": {
     "title": "Admin Console",

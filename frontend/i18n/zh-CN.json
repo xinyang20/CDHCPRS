@@ -130,7 +130,11 @@
     "ageError": "请输入 0-120 之间的整数",
     "chiefComplaintError": "请至少输入 4 个字符",
     "assistantLabel": "智能助手",
-    "userLabel": "用户"
+    "userLabel": "用户",
+    "diseaseHistory": "疾病史",
+    "recentSymptoms": "近期症状",
+    "tcmSyndrome": "中医证型",
+    "tcmSyndromeHint": "根据您的症状自动推断，供AI参考"
   },
   "admin": {
     "title": "管理员控制台",

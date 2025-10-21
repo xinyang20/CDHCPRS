@@ -2,9 +2,11 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { i18n } from '../i18n'
 
-const DEFAULT_API_BASE_URL = 'http://127.0.0.1:8001'
+// 云端部署使用相对路径（通过nginx代理），本地开发可通过环境变量 VITE_API_BASE_URL 设置
+const DEFAULT_API_BASE_URL = ''
 
 const getBaseUrl = () => {
+  // 优先使用环境变量，如果没有设置则使用默认值（空字符串=相对路径）
   const envUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ''
   const raw = envUrl.trim()
   const base = raw.length > 0 ? raw : DEFAULT_API_BASE_URL

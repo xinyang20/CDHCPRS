@@ -1,0 +1,314 @@
+/**
+ * 中医主题样式覆盖
+ * 覆盖 Element Plus 默认样式以匹配中医风格
+ */
+
+/* 按钮样式覆盖 */
+.el-button--primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-white) !important;
+}
+
+.el-button--primary:hover,
+.el-button--primary:focus {
+  background-color: var(--color-primaryDark) !important;
+  border-color: var(--color-primaryDark) !important;
+}
+
+.el-button--primary.is-disabled {
+  background-color: var(--color-primaryLight) !important;
+  border-color: var(--color-primaryLight) !important;
+}
+
+/* 文本按钮 */
+.el-button--text {
+  color: var(--color-primary) !important;
+}
+
+.el-button--text:hover,
+.el-button--text:focus {
+  color: var(--color-primaryDark) !important;
+}
+
+/* 输入框样式 */
+.el-input__inner,
+.el-textarea__inner {
+  background-color: var(--color-bgPrimary) !important;
+  border-color: var(--color-borderPrimary) !important;
+  color: var(--color-textPrimary) !important;
+}
+
+.el-input__inner:hover,
+.el-textarea__inner:hover {
+  border-color: var(--color-primary) !important;
+}
+
+.el-input__inner:focus,
+.el-textarea__inner:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(139, 115, 85, 0.1) !important;
+}
+
+/* 标签样式 */
+.el-tag--primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-white) !important;
+}
+
+.el-tag--warning {
+  background-color: var(--color-warning) !important;
+  border-color: var(--color-warning) !important;
+  color: var(--color-white) !important;
+}
+
+.el-tag--success {
+  background-color: var(--color-success) !important;
+  border-color: var(--color-success) !important;
+  color: var(--color-white) !important;
+}
+
+.el-tag--info {
+  background-color: var(--color-bgTertiary) !important;
+  border-color: var(--color-borderPrimary) !important;
+  color: var(--color-textSecondary) !important;
+}
+
+.el-tag--info.el-tag--plain {
+  background-color: var(--color-bgPrimary) !important;
+  border-color: var(--color-borderPrimary) !important;
+  color: var(--color-textSecondary) !important;
+}
+
+.el-tag--info.el-tag--dark {
+  background-color: var(--color-primaryLight) !important;
+  border-color: var(--color-primaryLight) !important;
+  color: var(--color-white) !important;
+}
+
+/* 对话框样式 */
+.el-dialog {
+  background: var(--color-bgPrimary) !important;
+  border: 2px solid var(--color-borderPrimary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 12px 32px rgba(139, 115, 85, 0.15) !important;
+}
+
+.el-dialog__header {
+  background: linear-gradient(to right, var(--color-bgSecondary), var(--color-bgPrimary));
+  border-bottom: 2px solid var(--color-borderPrimary);
+  padding: var(--spacing-lg);
+}
+
+.el-dialog__title {
+  color: var(--color-textPrimary) !important;
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+}
+
+.el-dialog__body {
+  background: var(--color-bgPrimary);
+  color: var(--color-textPrimary);
+}
+
+.el-dialog__footer {
+  background: var(--color-bgSecondary);
+  border-top: 1px solid var(--color-borderLight);
+  padding: var(--spacing-lg);
+}
+
+/* 表单项样式 */
+.el-form-item__label {
+  color: var(--color-textSecondary) !important;
+  font-weight: 500;
+}
+
+/* 单选框组 */
+.el-radio__input.is-checked .el-radio__inner {
+  border-color: var(--color-primary) !important;
+  background: var(--color-primary) !important;
+}
+
+.el-radio__input.is-checked + .el-radio__label {
+  color: var(--color-primary) !important;
+}
+
+.el-radio__inner:hover {
+  border-color: var(--color-primary) !important;
+}
+
+/* 复选框 */
+.el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.el-checkbox__input.is-checked + .el-checkbox__label {
+  color: var(--color-primary) !important;
+}
+
+.el-checkbox.is-bordered {
+  border-color: var(--color-borderSecondary) !important;
+  background: var(--color-bgPrimary);
+}
+
+.el-checkbox.is-bordered:hover {
+  border-color: var(--color-primary) !important;
+}
+
+.el-checkbox.is-bordered.is-checked {
+  border-color: var(--color-primary) !important;
+  background: linear-gradient(135deg, var(--color-bgTertiary), var(--color-bgPrimary));
+}
+
+/* 警告框 */
+.el-alert--warning {
+  background-color: var(--color-bgTertiary) !important;
+  border: 1px solid var(--color-warning) !important;
+  color: var(--color-textPrimary) !important;
+}
+
+.el-alert--success {
+  background-color: rgba(123, 139, 111, 0.1) !important;
+  border: 1px solid var(--color-success) !important;
+  color: var(--color-textPrimary) !important;
+}
+
+/* 滚动条 */
+.el-scrollbar__thumb {
+  background-color: var(--color-borderPrimary) !important;
+}
+
+.el-scrollbar__thumb:hover {
+  background-color: var(--color-primary) !important;
+}
+
+/* 下拉菜单 */
+.el-dropdown-menu {
+  background: var(--color-bgPrimary) !important;
+  border: 2px solid var(--color-borderPrimary) !important;
+  box-shadow: 0 8px 16px rgba(139, 115, 85, 0.12) !important;
+}
+
+.el-dropdown-menu__item {
+  color: var(--color-textPrimary) !important;
+}
+
+.el-dropdown-menu__item:hover {
+  background: var(--color-bgSecondary) !important;
+  color: var(--color-primary) !important;
+}
+
+.el-dropdown-menu__item--divided::before {
+  background-color: var(--color-borderLight) !important;
+}
+
+/* 描述列表 */
+.el-descriptions__label {
+  background-color: var(--color-bgSecondary) !important;
+  color: var(--color-textSecondary) !important;
+  font-weight: 500;
+}
+
+.el-descriptions__content {
+  background-color: var(--color-bgPrimary) !important;
+  color: var(--color-textPrimary) !important;
+}
+
+.el-descriptions--bordered .el-descriptions__label,
+.el-descriptions--bordered .el-descriptions__content {
+  border-color: var(--color-borderSecondary) !important;
+}
+
+/* 空状态 */
+.el-empty__description {
+  color: var(--color-textTertiary) !important;
+}
+
+.el-empty__image svg {
+  fill: var(--color-borderPrimary) !important;
+}
+
+/* 消息提示 */
+.el-message {
+  background: var(--color-bgPrimary) !important;
+  border: 1px solid var(--color-borderPrimary) !important;
+  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.15) !important;
+}
+
+.el-message--success {
+  background: var(--color-bgPrimary) !important;
+  border-color: var(--color-success) !important;
+}
+
+.el-message--warning {
+  background: var(--color-bgPrimary) !important;
+  border-color: var(--color-warning) !important;
+}
+
+.el-message--error {
+  background: var(--color-bgPrimary) !important;
+  border-color: var(--color-danger) !important;
+}
+
+/* 消息框 */
+.el-message-box {
+  background: var(--color-bgPrimary) !important;
+  border: 2px solid var(--color-borderPrimary) !important;
+  box-shadow: 0 12px 32px rgba(139, 115, 85, 0.2) !important;
+}
+
+.el-message-box__title {
+  color: var(--color-textPrimary) !important;
+}
+
+.el-message-box__message {
+  color: var(--color-textSecondary) !important;
+}
+
+/* Tooltip */
+.el-tooltip__popper {
+  background: var(--color-primaryDark) !important;
+  color: var(--color-white) !important;
+}
+
+.el-tooltip__popper[data-popper-placement^="top"] .el-popper__arrow::before {
+  background: var(--color-primaryDark) !important;
+  border-color: var(--color-primaryDark) !important;
+}
+
+.el-tooltip__popper[data-popper-placement^="bottom"] .el-popper__arrow::before {
+  background: var(--color-primaryDark) !important;
+  border-color: var(--color-primaryDark) !important;
+}
+
+.el-tooltip__popper[data-popper-placement^="left"] .el-popper__arrow::before {
+  background: var(--color-primaryDark) !important;
+  border-color: var(--color-primaryDark) !important;
+}
+
+.el-tooltip__popper[data-popper-placement^="right"] .el-popper__arrow::before {
+  background: var(--color-primaryDark) !important;
+  border-color: var(--color-primaryDark) !important;
+}
+
+/* 加载动画 */
+.el-loading-mask {
+  background-color: rgba(250, 247, 243, 0.9) !important;
+}
+
+.el-loading-spinner .el-loading-text {
+  color: var(--color-primary) !important;
+}
+
+/* 图标颜色 */
+.el-icon {
+  color: inherit;
+}
+
+/* 头像 */
+.el-avatar {
+  background: var(--color-primary) !important;
+  color: var(--color-white) !important;
+}

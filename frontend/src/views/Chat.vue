@@ -969,16 +969,16 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: 300px 1fr;
   height: 100vh;
-  background: linear-gradient(120deg, rgba(240, 160, 75, 0.08), #ffffff 45%);
+  background: linear-gradient(135deg, var(--color-bgSecondary) 0%, var(--color-bgPrimary) 50%);
   overflow: hidden;
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.92);
-  border-right: 1px solid var(--color-borderPrimary);
-  backdrop-filter: blur(12px);
+  background: var(--color-bgSecondary);
+  border-right: 2px solid var(--color-borderPrimary);
+  box-shadow: 2px 0 8px rgba(139, 115, 85, 0.1);
 }
 
 .sidebar-header {
@@ -1011,16 +1011,20 @@ onUnmounted(() => {
   border-bottom: 1px solid var(--color-borderLight);
   cursor: pointer;
   transition: all var(--transition-base);
+  position: relative;
 }
 
 .conversation-item:hover {
-  background: rgba(240, 160, 75, 0.08);
+  background: var(--color-bgTertiary);
+  border-left: 3px solid var(--color-primaryLight);
+  padding-left: calc(var(--spacing-lg) - 3px);
 }
 
 .conversation-item.active {
   background: var(--color-primary);
   color: var(--color-white);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  border-left: 3px solid var(--color-primaryDark);
+  padding-left: calc(var(--spacing-lg) - 3px);
 }
 
 .conversation-item.active .conversation-time,
@@ -1084,7 +1088,7 @@ onUnmounted(() => {
 
 .main-content {
   position: relative;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-bgPrimary);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -1096,19 +1100,31 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: radial-gradient(circle at center, var(--color-bgPrimary), var(--color-bgSecondary));
 }
 
 .welcome-card {
-  background: linear-gradient(
-    135deg,
-    rgba(240, 160, 75, 0.12),
-    rgba(240, 160, 75, 0.22)
-  );
+  background: var(--color-bgSecondary);
+  border: 2px solid var(--color-borderPrimary);
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-4xl);
   text-align: center;
   max-width: 520px;
-  box-shadow: 0 18px 40px rgba(240, 160, 75, 0.18);
+  box-shadow: 0 8px 24px rgba(139, 115, 85, 0.15);
+  position: relative;
+}
+
+.welcome-card::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(45deg, var(--color-primaryDark), var(--color-primaryLight));
+  border-radius: var(--border-radius-lg);
+  opacity: 0.1;
+  z-index: -1;
 }
 
 .welcome-card h1 {
@@ -1140,8 +1156,8 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--color-borderPrimary);
-  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 2px solid var(--color-borderPrimary);
+  background: linear-gradient(to bottom, var(--color-bgPrimary), var(--color-bgSecondary));
   flex-shrink: 0;
 }
 
@@ -1155,6 +1171,7 @@ onUnmounted(() => {
   margin: 0;
   font-size: var(--font-size-2xl);
   color: var(--color-textPrimary);
+  font-weight: 600;
 }
 
 .chat-actions {
@@ -1164,11 +1181,22 @@ onUnmounted(() => {
 
 .patient-info-card {
   padding: var(--spacing-xl) var(--spacing-2xl);
-  border-bottom: 1px solid var(--color-borderLight);
-  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 2px solid var(--color-borderLight);
+  background: linear-gradient(to right, var(--color-bgSecondary), var(--color-bgPrimary));
   flex-shrink: 0;
   max-height: 300px;
   overflow-y: auto;
+  position: relative;
+}
+
+.patient-info-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-borderPrimary), transparent);
 }
 
 .patient-info-card .card-header {
@@ -1209,11 +1237,7 @@ onUnmounted(() => {
   overflow-y: auto;
   overflow-x: hidden;
   padding: var(--spacing-xl) var(--spacing-2xl);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.95),
-    rgba(245, 229, 204, 0.25)
-  );
+  background: var(--color-bgPrimary);
   min-height: 0;
   height: 0;
 }
@@ -1238,26 +1262,30 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(240, 160, 75, 0.35);
+  border: 2px solid var(--color-primaryLight);
+  box-shadow: 0 2px 8px rgba(139, 115, 85, 0.2);
 }
 
 .message.user .message-avatar {
-  background: #409eff;
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+  background: var(--color-primaryDark);
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 2px 8px rgba(107, 88, 64, 0.3);
 }
 
 .message-content {
   max-width: 70%;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: var(--border-radius-lg);
+  background: var(--color-bgSecondary);
+  border: 1px solid var(--color-borderLight);
+  border-radius: var(--border-radius-md);
   padding: var(--spacing-md) var(--spacing-lg);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 2px 12px rgba(139, 115, 85, 0.08);
   position: relative;
   overflow: hidden;
 }
 
 .message.user .message-content {
-  background: rgba(64, 158, 255, 0.12);
+  background: linear-gradient(135deg, var(--color-bgTertiary), var(--color-bgSecondary));
+  border: 1px solid var(--color-borderPrimary);
 }
 
 .message-time {
@@ -1280,20 +1308,33 @@ onUnmounted(() => {
 
 .input-area {
   padding: var(--spacing-xl) var(--spacing-2xl);
-  border-top: 1px solid var(--color-borderPrimary);
-  background: rgba(255, 255, 255, 0.95);
+  border-top: 2px solid var(--color-borderPrimary);
+  background: var(--color-bgSecondary);
   flex-shrink: 0;
   transition: all 0.3s ease;
+  position: relative;
+}
+
+.input-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, var(--color-primaryDark), var(--color-primary), var(--color-primaryDark));
+  opacity: 0.3;
 }
 
 .input-area.disabled-conversation {
-  background: rgba(255, 243, 224, 0.95);
-  border-top: 2px solid #ffa726;
+  background: linear-gradient(135deg, var(--color-bgTertiary), var(--color-bgSecondary));
+  border-top: 2px solid var(--color-warning);
 }
 
 .input-area.disabled-conversation :deep(.el-textarea__inner) {
-  background: #f5f5f5;
+  background: var(--color-bgPrimary);
   cursor: not-allowed;
+  border-color: var(--color-borderSecondary);
 }
 
 .mt-sm {
@@ -1352,10 +1393,21 @@ onUnmounted(() => {
   gap: var(--spacing-sm);
   max-height: 200px;
   overflow-y: auto;
-  padding: var(--spacing-sm);
-  background: rgba(240, 160, 75, 0.05);
+  padding: var(--spacing-md);
+  background: var(--color-bgPrimary);
   border-radius: var(--border-radius-md);
-  border: 1px dashed var(--color-borderLight);
+  border: 2px dashed var(--color-borderSecondary);
+  position: relative;
+}
+
+.symptoms-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--color-bgTertiary), transparent);
+  opacity: 0.3;
+  border-radius: var(--border-radius-md);
+  pointer-events: none;
 }
 
 .symptom-tag {
@@ -1363,11 +1415,13 @@ onUnmounted(() => {
   user-select: none;
   transition: all var(--transition-fast);
   font-size: var(--font-size-sm);
+  border: 1px solid var(--color-borderLight) !important;
 }
 
 .symptom-tag:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(240, 160, 75, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(139, 115, 85, 0.15);
+  border-color: var(--color-primary) !important;
 }
 
 .symptom-tag:active {

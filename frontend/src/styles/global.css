@@ -4,27 +4,27 @@
  */
 
 :root {
-  /* 颜色变量 */
-  --color-primary: #f0a04b;
-  --color-primaryLight: #f5d0a9;
-  --color-primaryDark: #d88a35;
-  --color-success: #67c23a;
-  --color-warning: #e6a23c;
-  --color-danger: #f56c6c;
-  --color-info: #909399;
-  --color-bgPrimary: #ffffff;
-  --color-bgSecondary: #f5f5f5;
-  --color-bgTertiary: #fafafa;
-  --color-textPrimary: #333333;
-  --color-textSecondary: #666666;
-  --color-textTertiary: #999999;
-  --color-textDisabled: #c0c4cc;
-  --color-borderPrimary: #e0e0e0;
-  --color-borderSecondary: #dcdfe6;
-  --color-borderLight: #f0f0f0;
+  /* 颜色变量 - 中医褐色系主题 */
+  --color-primary: #8B7355;         /* 主褐色 */
+  --color-primaryLight: #A89585;    /* 浅褐色 */
+  --color-primaryDark: #6B5840;     /* 深褐色 */
+  --color-success: #7B8B6F;         /* 草绿色 - 中医草药色 */
+  --color-warning: #C19A6B;         /* 驼色警告 */
+  --color-danger: #B85450;          /* 朱砂红 */
+  --color-info: #8B8680;            /* 灰褐色 */
+  --color-bgPrimary: #FAF7F3;       /* 主背景米白 */
+  --color-bgSecondary: #F5E6D3;     /* 次背景米色 */
+  --color-bgTertiary: #E8D5C4;      /* 三级背景淡褐 */
+  --color-textPrimary: #3E342E;     /* 深褐文字 */
+  --color-textSecondary: #5D4E37;   /* 中褐文字 */
+  --color-textTertiary: #8B7D6B;    /* 浅褐文字 */
+  --color-textDisabled: #C4B5A0;    /* 禁用文字 */
+  --color-borderPrimary: #C4B5A0;   /* 主边框褐色 */
+  --color-borderSecondary: #D4C4B0; /* 次边框淡褐 */
+  --color-borderLight: #E8D5C4;     /* 浅边框 */
   --color-white: #ffffff;
   --color-black: #000000;
-  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-overlay: rgba(59, 46, 36, 0.5);  /* 褐色遮罩 */
 
   /* 字体大小变量 */
   --font-size-xs: 12px;

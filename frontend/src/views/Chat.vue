@@ -61,6 +61,10 @@
       </el-scrollbar>
 
       <div class="sidebar-footer">
+        <div class="footer-switches">
+          <SeniorModeSwitcher />
+          <LanguageSwitcher />
+        </div>
         <el-dropdown trigger="click">
           <span class="user-info">
             <el-avatar size="small" icon="User" />
@@ -434,6 +438,8 @@ import { chatAPI } from "../api/chat";
 import { useUserStore } from "../stores/user";
 import BackendStatus from "../components/BackendStatus.vue";
 import MarkdownRenderer from "../components/MarkdownRenderer.vue";
+import LanguageSwitcher from "../components/LanguageSwitcher.vue";
+import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
 import {
   DISEASES,
   getSymptomsByDiseases,
@@ -1068,6 +1074,15 @@ onUnmounted(() => {
 .sidebar-footer {
   padding: var(--spacing-lg);
   border-top: 1px solid var(--color-borderPrimary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.footer-switches {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
 .user-info {

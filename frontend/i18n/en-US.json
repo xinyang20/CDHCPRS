@@ -305,5 +305,10 @@
     "backendOkDetail": "Backend service is responding correctly",
     "backendErrorDetail": "Unable to reach the backend service. Please ensure it is running.",
     "lastCheck": "Last check: {time}"
+  },
+  "seniorMode": {
+    "label": "Senior Mode",
+    "on": "On",
+    "off": "Off"
   }
 }

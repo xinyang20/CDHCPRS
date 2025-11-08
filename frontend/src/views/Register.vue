@@ -1,6 +1,7 @@
 <template>
   <div class="auth-container">
     <div class="language-switcher-wrapper">
+      <SeniorModeSwitcher />
       <LanguageSwitcher />
     </div>
     <el-card class="auth-card">
@@ -65,6 +66,7 @@ import { ElMessage } from "element-plus";
 import type { FormInstance, FormItemRule, FormRules } from "element-plus";
 import { authAPI } from "../api/auth";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
+import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -158,6 +160,9 @@ const handleRegister = async () => {
   position: absolute;
   top: var(--spacing-xl);
   right: var(--spacing-xl);
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
 }
 
 .auth-card {

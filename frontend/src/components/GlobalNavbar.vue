@@ -42,6 +42,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { ElMessageBox } from 'element-plus'
 import { useUserStore } from '../stores/user'
 import LargeFontModeSwitcher from './LargeFontModeSwitcher.vue'
 import LanguageSwitcher from './LanguageSwitcher.vue'
@@ -54,9 +55,22 @@ const userStore = useUserStore()
 const websiteName = ref('')
 const websiteLogo = ref('')
 
-const handleLogout = () => {
-  userStore.logout()
-  router.push('/login')
+const handleLogout = async () => {
+  try {
+    await ElMessageBox.confirm(
+      t('messages.logoutConfirm'),
+      t('messages.confirmTitle'),
+      {
+        confirmButtonText: t('common.actions.confirm'),
+        cancelButtonText: t('common.actions.cancel'),
+        type: 'warning',
+      }
+    )
+    userStore.logout()
+    router.push('/login')
+  } catch {
+    // 用户取消登出
+  }
 }
 
 onMounted(async () => {

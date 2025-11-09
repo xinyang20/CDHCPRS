@@ -3,22 +3,10 @@
     <BackendStatus />
 
     <el-container class="admin-layout">
-      <el-header class="admin-header">
-        <div class="header-content">
-          <div class="header-copy">
-            <h2>{{ t("admin.title") }}</h2>
-            <p class="header-subtitle">{{ t("admin.subtitle") }}</p>
-          </div>
-          <div class="header-actions">
-            <LargeFontModeSwitcher />
-            <LanguageSwitcher />
-            <el-button type="primary" @click="router.push('/chat')">
-              <el-icon><ChatDotRound /></el-icon>
-              {{ t("common.actions.back") }}
-            </el-button>
-          </div>
-        </div>
-      </el-header>
+      <div class="admin-header-section">
+        <h2>{{ t("admin.title") }}</h2>
+        <p class="header-subtitle">{{ t("admin.subtitle") }}</p>
+      </div>
 
       <el-container>
         <el-aside width="240px" class="admin-aside">
@@ -307,7 +295,7 @@
                 >
                   <el-input-number
                     v-model="settingsForm.large_font_scale"
-                    :min="1.0"
+                    :min="1.2"
                     :max="3.0"
                     :step="0.1"
                     :precision="1"
@@ -379,28 +367,28 @@
                     </el-form-item>
                   </el-col>
 
-                  <el-col :xs="24" :md="12" class="model-actions">
-                    <div class="inline-actions">
-                      <el-button
-                        type="primary"
-                        plain
-                        :loading="fetchingModels"
-                        :disabled="!canFetchModels"
-                        @click="handleFetchModels"
-                      >
-                        <el-icon><Search /></el-icon>
-                        {{ t("common.actions.fetchModels") }}
-                      </el-button>
-                      <el-button
-                        type="success"
-                        plain
-                        :loading="testingConnection"
-                        @click="handleTestConnection"
-                      >
-                        <el-icon><Link /></el-icon>
-                        {{ t("common.actions.test") }}
-                      </el-button>
-                    </div>
+                  <el-col :xs="24" :md="12">
+                    <el-form-item label=" ">
+                      <div class="inline-actions">
+                        <el-button
+                          plain
+                          :loading="fetchingModels"
+                          :disabled="!canFetchModels"
+                          @click="handleFetchModels"
+                        >
+                          <el-icon><Search /></el-icon>
+                          {{ t("common.actions.fetchModels") }}
+                        </el-button>
+                        <el-button
+                          plain
+                          :loading="testingConnection"
+                          @click="handleTestConnection"
+                        >
+                          <el-icon><Link /></el-icon>
+                          {{ t("common.actions.test") }}
+                        </el-button>
+                      </div>
+                    </el-form-item>
                   </el-col>
 
                   <el-col :xs="24" :md="12">
@@ -511,7 +499,7 @@ import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import {
-  ChatDotRound,
+
   Link,
   Check,
   Promotion,
@@ -531,8 +519,6 @@ import {
 } from "element-plus";
 
 import BackendStatus from "../components/BackendStatus.vue";
-import LanguageSwitcher from "../components/LanguageSwitcher.vue";
-import LargeFontModeSwitcher from "../components/LargeFontModeSwitcher.vue";
 import MarkdownRenderer from "../components/MarkdownRenderer.vue";
 import {
   adminAPI,
@@ -1024,25 +1010,14 @@ onMounted(async () => {
   height: 100vh;
 }
 
-.admin-header {
-  background: transparent;
-  padding: var(--spacing-lg) var(--spacing-2xl);
-  border-bottom: 1px solid var(--color-borderPrimary);
+.admin-header-section {
+  background: var(--color-bgPrimary);
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  border-bottom: 1px solid var(--color-borderLight);
+  margin-left: 240px; /* 避免被侧边栏遮挡 */
 }
 
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.header-copy h2 {
+.admin-header-section h2 {
   margin: 0;
   color: var(--color-primaryDark);
   font-size: var(--font-size-3xl);
@@ -1146,18 +1121,12 @@ onMounted(async () => {
   display: flex;
   gap: var(--spacing-sm);
   justify-content: flex-start;
-  margin-top: var(--spacing-sm);
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
   margin-top: var(--spacing-xl);
-}
-
-.model-actions {
-  display: flex;
-  align-items: flex-end;
 }
 
 .conversation-timeline {

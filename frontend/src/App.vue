@@ -47,9 +47,9 @@ watch(() => route.path, () => {
   }
 }, { immediate: true })
 
-// 决定是否显示导航栏（除了 /admin 页面外都显示）
+// 所有页面都显示导航栏
 const shouldShowNav = computed(() => {
-  return route.path !== '/admin'
+  return true
 })
 </script>
 

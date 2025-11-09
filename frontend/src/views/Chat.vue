@@ -1475,4 +1475,15 @@ onUnmounted(() => {
     height: 100vh;
   }
 }
+
+/* 大字版模式下扩大侧边栏宽度 */
+html.large-font-mode .chat-layout {
+  grid-template-columns: 400px 1fr;
+}
+
+@media (max-width: 1200px) and (min-width: 961px) {
+  html.large-font-mode .chat-layout {
+    grid-template-columns: 340px 1fr;
+  }
+}
 </style>

@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSettingsStore } from './stores/settings'
 import GlobalNavbar from './components/GlobalNavbar.vue'
@@ -33,10 +33,23 @@ onMounted(async () => {
   }
 })
 
-// 决定是否显示导航栏（只在特定页面显示）
+// 监听路由变化，在 /admin 页面禁用大字版
+watch(() => route.path, () => {
+  const isAdminPage = route.path === '/admin'
+  if (isAdminPage) {
+    document.documentElement.classList.remove('large-font-mode')
+  } else if (settingsStore.largeFontMode) {
+    // 重新应用大字版样式
+    const baseFontSize = 16
+    const scaledSize = baseFontSize * settingsStore.largeFontScale
+    document.documentElement.style.setProperty('--large-font-size', `${scaledSize}px`)
+    document.documentElement.classList.add('large-font-mode')
+  }
+}, { immediate: true })
+
+// 决定是否显示导航栏（除了 /admin 页面外都显示）
 const shouldShowNav = computed(() => {
-  const showNavPages = ['/', '/about', '/login', '/register']
-  return showNavPages.includes(route.path)
+  return route.path !== '/admin'
 })
 </script>
 

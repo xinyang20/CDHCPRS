@@ -14,7 +14,10 @@ export const useSettingsStore = defineStore('settings', () => {
 
   // 应用大字版样式
   const applyLargeFontStyle = () => {
-    if (largeFontMode.value) {
+    // 检查当前路径，如果是 /admin 页面则不应用大字版
+    const isAdminPage = window.location.pathname === '/admin'
+
+    if (largeFontMode.value && !isAdminPage) {
       const baseFontSize = 16 // 基础字体大小
       const scaledSize = baseFontSize * largeFontScale.value
       document.documentElement.style.setProperty('--large-font-size', `${scaledSize}px`)

@@ -1,7 +1,7 @@
 <template>
   <div class="auth-container">
     <div class="language-switcher-wrapper">
-      <SeniorModeSwitcher />
+      <LargeFontModeSwitcher />
       <LanguageSwitcher />
     </div>
     <el-card class="auth-card">
@@ -69,7 +69,7 @@ import { authAPI } from "../api/auth";
 import { useUserStore } from "../stores/user";
 import api from "../api";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
-import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
+import LargeFontModeSwitcher from "../components/LargeFontModeSwitcher.vue";
 
 const { t } = useI18n();
 const router = useRouter();

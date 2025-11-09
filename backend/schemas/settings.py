@@ -25,6 +25,7 @@ class PublicSettings(BaseModel):
 
     website_name: str = Field(..., description="网站名称")
     website_logo: str = Field(..., description="网站 Logo URL")
+    large_font_scale: float = Field(default=1.5, description="大字版字体放大倍率")
 
 
 class AdminSettings(BaseModel):
@@ -38,6 +39,7 @@ class AdminSettings(BaseModel):
     llm_api_key: str = Field(default="", description="LLM API Key")
     llm_model_id: str = Field(default="", description="LLM 模型 ID")
     llm_model_name: str = Field(default="", description="LLM 模型名称（用于展示或备用）")
+    large_font_scale: float = Field(default=1.5, description="大字版字体放大倍率")
 
 
 class AdminSettingsUpdate(BaseModel):
@@ -51,6 +53,7 @@ class AdminSettingsUpdate(BaseModel):
     llm_api_key: Optional[str] = Field(None, description="LLM API Key")
     llm_model_id: Optional[str] = Field(None, description="LLM 模型 ID")
     llm_model_name: Optional[str] = Field(None, description="LLM 模型名称（用于展示或备用）")
+    large_font_scale: Optional[float] = Field(None, description="大字版字体放大倍率")
 
 
 class TestConnectionRequest(BaseModel):

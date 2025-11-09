@@ -4,7 +4,7 @@
       <div class="header-content">
         <h1 class="logo">{{ websiteName }}</h1>
         <nav class="nav">
-          <SeniorModeSwitcher />
+          <LargeFontModeSwitcher />
           <LanguageSwitcher />
           <el-button text @click="scrollToSection('features')">{{
             t("home.nav.features")
@@ -115,7 +115,7 @@ import {
 import api from "../api";
 import BackendStatus from "../components/BackendStatus.vue";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
-import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
+import LargeFontModeSwitcher from "../components/LargeFontModeSwitcher.vue";
 
 const { t } = useI18n();
 

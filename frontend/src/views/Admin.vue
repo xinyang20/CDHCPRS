@@ -10,7 +10,7 @@
             <p class="header-subtitle">{{ t("admin.subtitle") }}</p>
           </div>
           <div class="header-actions">
-            <SeniorModeSwitcher />
+            <LargeFontModeSwitcher />
             <LanguageSwitcher />
             <el-button type="primary" @click="router.push('/chat')">
               <el-icon><ChatDotRound /></el-icon>
@@ -301,6 +301,23 @@
                   />
                 </el-form-item>
 
+                <el-form-item
+                  prop="large_font_scale"
+                  :label="t('admin.settings.largeFontScale')"
+                >
+                  <el-input-number
+                    v-model="settingsForm.large_font_scale"
+                    :min="1.0"
+                    :max="3.0"
+                    :step="0.1"
+                    :precision="1"
+                    :placeholder="t('admin.settings.largeFontScalePlaceholder')"
+                  />
+                  <el-text size="small" type="info" style="margin-left: 12px">{{
+                    t("admin.settings.largeFontScaleTips")
+                  }}</el-text>
+                </el-form-item>
+
                 <el-divider content-position="left">{{
                   t("admin.settings.llm")
                 }}</el-divider>
@@ -329,6 +346,7 @@
                         <el-option label="Qwen" value="qwen" />
                         <el-option label="OpenAI" value="openai" />
                         <el-option label="OpenAIful" value="openaiful" />
+                        <el-option label="Dify" value="dify" />
                       </el-select>
                     </el-form-item>
                   </el-col>
@@ -371,7 +389,7 @@
                         @click="handleFetchModels"
                       >
                         <el-icon><Search /></el-icon>
-                        {{ t("admin.settings.fetchModels") }}
+                        {{ t("common.actions.fetchModels") }}
                       </el-button>
                       <el-button
                         type="success"
@@ -380,7 +398,7 @@
                         @click="handleTestConnection"
                       >
                         <el-icon><Link /></el-icon>
-                        {{ t("admin.settings.testLink") }}
+                        {{ t("common.actions.test") }}
                       </el-button>
                     </div>
                   </el-col>
@@ -514,7 +532,7 @@ import {
 
 import BackendStatus from "../components/BackendStatus.vue";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
-import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
+import LargeFontModeSwitcher from "../components/LargeFontModeSwitcher.vue";
 import MarkdownRenderer from "../components/MarkdownRenderer.vue";
 import {
   adminAPI,
@@ -557,6 +575,7 @@ const settingsForm = reactive<
   website_name: "",
   website_logo: "",
   system_prompt: "",
+  large_font_scale: 1.5,
   llm_provider: "deepseek",
   llm_base_url: "",
   llm_api_key: "",
@@ -574,11 +593,11 @@ const providerDefaults: Record<string, string> = {
 };
 
 const isBaseUrlRequired = computed(
-  () => settingsForm.llm_provider === "openaiful"
+  () => settingsForm.llm_provider === "openaiful" || settingsForm.llm_provider === "dify"
 );
 
 const baseUrlPlaceholder = computed(() => {
-  if (settingsForm.llm_provider === "openaiful") {
+  if (settingsForm.llm_provider === "openaiful" || settingsForm.llm_provider === "dify") {
     return t("admin.settings.baseUrlRequiredPlaceholder");
   }
   const preset =
@@ -592,7 +611,7 @@ const canFetchModels = computed(() => {
   if (!settingsForm.llm_provider || !settingsForm.llm_api_key?.trim()) {
     return false;
   }
-  if (settingsForm.llm_provider === "openaiful") {
+  if (settingsForm.llm_provider === "openaiful" || settingsForm.llm_provider === "dify") {
     return Boolean(settingsForm.llm_base_url?.trim());
   }
   return true;
@@ -967,6 +986,7 @@ const submitSettings = async () => {
       website_name: settingsForm.website_name,
       website_logo: settingsForm.website_logo,
       system_prompt: settingsForm.system_prompt,
+      large_font_scale: settingsForm.large_font_scale,
       llm_provider: settingsForm.llm_provider,
       llm_base_url: settingsForm.llm_base_url,
       llm_api_key: settingsForm.llm_api_key,

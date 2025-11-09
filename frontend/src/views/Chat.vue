@@ -62,7 +62,7 @@
 
       <div class="sidebar-footer">
         <div class="footer-switches">
-          <SeniorModeSwitcher />
+          <LargeFontModeSwitcher />
           <LanguageSwitcher />
         </div>
         <el-dropdown trigger="click">
@@ -439,7 +439,7 @@ import { useUserStore } from "../stores/user";
 import BackendStatus from "../components/BackendStatus.vue";
 import MarkdownRenderer from "../components/MarkdownRenderer.vue";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
-import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
+import LargeFontModeSwitcher from "../components/LargeFontModeSwitcher.vue";
 import {
   DISEASES,
   getSymptomsByDiseases,

@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "Chronic Disease Care Assistant",
+    "menu": "Menu",
     "brandTagline": "Oriental Wellness Copilot",
     "actions": {
       "refresh": "Refresh",
@@ -33,6 +34,7 @@
   },
   "home": {
     "nav": {
+      "home": "Home",
       "features": "Features",
       "about": "About",
       "login": "Login",
@@ -86,6 +88,7 @@
     }
   },
   "chat": {
+    "title": "Chat",
     "sidebarTagline": "Oriental Wellness Copilot",
     "newConversation": "New Conversation",
     "refresh": "Refresh",
@@ -204,7 +207,10 @@
       "baseUrlRequired": "Please enter the base URL",
       "baseUrlRequiredPlaceholder": "Enter the full base URL (e.g. https://api.example.com/v1)",
       "websiteNameRequired": "Please enter the website name",
-      "systemPromptRequired": "Please enter the system prompt"
+      "systemPromptRequired": "Please enter the system prompt",
+      "largeFontScale": "Large Font Scale",
+      "largeFontScalePlaceholder": "Enter scale factor (e.g. 1.5 for 150%)",
+      "largeFontScaleTips": "Recommended range: 1.2 - 2.0"
     },
     "dialog": {
       "conversationTitle": "Conversation",
@@ -306,8 +312,8 @@
     "backendErrorDetail": "Unable to reach the backend service. Please ensure it is running.",
     "lastCheck": "Last check: {time}"
   },
-  "seniorMode": {
-    "label": "Senior Mode",
+  "largeFontMode": {
+    "label": "Large Font Mode",
     "on": "On",
     "off": "Off"
   }

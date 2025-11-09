@@ -10,6 +10,7 @@
             <p class="header-subtitle">{{ t("admin.subtitle") }}</p>
           </div>
           <div class="header-actions">
+            <SeniorModeSwitcher />
             <LanguageSwitcher />
             <el-button type="primary" @click="router.push('/chat')">
               <el-icon><ChatDotRound /></el-icon>
@@ -513,6 +514,7 @@ import {
 
 import BackendStatus from "../components/BackendStatus.vue";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
+import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
 import MarkdownRenderer from "../components/MarkdownRenderer.vue";
 import {
   adminAPI,

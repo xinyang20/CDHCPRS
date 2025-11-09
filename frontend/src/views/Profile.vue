@@ -7,6 +7,7 @@
         <div class="card-header">
           <h2>{{ t("profile.title") }}</h2>
           <div class="header-actions">
+            <SeniorModeSwitcher />
             <LanguageSwitcher />
             <el-button @click="$router.back()">{{
               t("common.actions.back")
@@ -83,6 +84,7 @@ import { useUserStore } from "../stores/user";
 import { authAPI } from "../api/auth";
 import BackendStatus from "../components/BackendStatus.vue";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
+import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
 
 const { t, locale } = useI18n();
 const userStore = useUserStore();

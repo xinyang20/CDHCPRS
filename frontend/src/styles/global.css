@@ -262,3 +262,12 @@ body {
   }
 }
 
+/* 老年版模式 - 字体放大150% */
+html.senior-mode {
+  font-size: 24px; /* 16px * 1.5 = 24px */
+}
+
+html.senior-mode body {
+  font-size: 24px;
+}
+

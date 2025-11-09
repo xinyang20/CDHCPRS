@@ -14,68 +14,20 @@
       </div>
 
       <nav class="navbar-center">
-        <el-dropdown @command="handleNavigate">
-          <el-button type="text" class="nav-dropdown-button">
-            <el-icon><Menu /></el-icon>
-            {{ t('common.menu') }}
-            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="/" :icon="HomeFilled">
-                {{ t('home.nav.home') }}
-              </el-dropdown-item>
-              <el-dropdown-item command="/about" :icon="InfoFilled">
-                {{ t('home.nav.about') }}
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-if="userStore.isAuthenticated()"
-                command="/chat"
-                :icon="ChatDotRound"
-              >
-                {{ t('chat.title') }}
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-if="userStore.isAuthenticated()"
-                command="/profile"
-                :icon="User"
-              >
-                {{ t('profile.title') }}
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-if="userStore.isAdmin()"
-                command="/admin"
-                :icon="Setting"
-                divided
-              >
-                {{ t('chat.userMenu.admin') }}
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-if="!userStore.isAuthenticated()"
-                command="/login"
-                :icon="User"
-                divided
-              >
-                {{ t('home.nav.login') }}
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-if="!userStore.isAuthenticated()"
-                command="/register"
-                :icon="UserFilled"
-              >
-                {{ t('home.nav.register') }}
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-if="userStore.isAuthenticated()"
-                command="logout"
-                :icon="SwitchButton"
-                divided
-              >
-                {{ t('common.actions.logout') }}
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+        <router-link to="/" class="nav-link">{{ t('home.nav.home') }}</router-link>
+        <router-link to="/about" class="nav-link">{{ t('home.nav.about') }}</router-link>
+        <router-link v-if="userStore.isAuthenticated()" to="/chat" class="nav-link">
+          {{ t('chat.title') }}
+        </router-link>
+        <router-link v-if="userStore.isAdmin()" to="/admin" class="nav-link">
+          {{ t('chat.userMenu.admin') }}
+        </router-link>
+        <router-link v-if="!userStore.isAuthenticated()" to="/login" class="nav-link">
+          {{ t('home.nav.login') }}
+        </router-link>
+        <a v-if="userStore.isAuthenticated()" @click="handleLogout" class="nav-link" style="cursor: pointer">
+          {{ t('common.actions.logout') }}
+        </a>
       </nav>
 
       <div class="navbar-right">
@@ -90,17 +42,6 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import {
-  Menu,
-  ArrowDown,
-  HomeFilled,
-  InfoFilled,
-  ChatDotRound,
-  User,
-  UserFilled,
-  Setting,
-  SwitchButton
-} from '@element-plus/icons-vue'
 import { useUserStore } from '../stores/user'
 import LargeFontModeSwitcher from './LargeFontModeSwitcher.vue'
 import LanguageSwitcher from './LanguageSwitcher.vue'
@@ -113,13 +54,9 @@ const userStore = useUserStore()
 const websiteName = ref('')
 const websiteLogo = ref('')
 
-const handleNavigate = (command: string) => {
-  if (command === 'logout') {
-    userStore.logout()
-    router.push('/login')
-  } else {
-    router.push(command)
-  }
+const handleLogout = () => {
+  userStore.logout()
+  router.push('/login')
 }
 
 onMounted(async () => {
@@ -183,11 +120,27 @@ onMounted(async () => {
   flex: 1 1 auto;
   display: flex;
   justify-content: center;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
 }
 
-.nav-dropdown-button {
+.nav-link {
+  color: var(--color-textSecondary);
+  text-decoration: none;
   font-size: var(--font-size-base);
-  color: var(--color-textPrimary);
+  transition: color var(--transition-fast);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+}
+
+.nav-link:hover {
+  color: var(--color-primary);
+  background: var(--color-bgSecondary);
+}
+
+.nav-link.router-link-active {
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .navbar-right {
@@ -199,6 +152,10 @@ onMounted(async () => {
 
 @media (max-width: 768px) {
   .brand-name {
+    display: none;
+  }
+
+  .navbar-center {
     display: none;
   }
 }

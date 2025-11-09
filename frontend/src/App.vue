@@ -33,9 +33,10 @@ onMounted(async () => {
   }
 })
 
-// 决定是否显示导航栏（Chat页面有自己的导航）
+// 决定是否显示导航栏（只在特定页面显示）
 const shouldShowNav = computed(() => {
-  return route.path !== '/chat'
+  const showNavPages = ['/', '/about', '/login', '/register']
+  return showNavPages.includes(route.path)
 })
 </script>
 

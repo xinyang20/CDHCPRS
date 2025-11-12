@@ -736,19 +736,27 @@ const loadConversations = async () => {
 const loadMessages = async (conversationId: number) => {
   try {
     const res = await chatAPI.getMessages(conversationId);
-    messages.value = res.data;
+    // 确保只加载属于当前对话的消息
+    const loadedMessages = res.data.filter(
+      (msg: MessageItem) => msg.conversation_id === conversationId
+    );
+    messages.value = loadedMessages;
     await scrollToBottom();
     if (messages.value.length === 0 && hasPatientInfo.value) {
       shouldAttachUserInfo.value = true;
     }
   } catch (error) {
     console.error("Failed to load messages:", error);
+    // 加载失败时清空消息，避免显示错误数据
+    messages.value = [];
   }
 };
 
-const selectConversation = async (id: number) => {
-  if (currentConversationId.value === id) return;
+const selectConversation = async (id: number, forceReload = false) => {
+  if (currentConversationId.value === id && !forceReload) return;
   currentConversationId.value = id;
+  // 先清空消息，防止显示旧数据
+  messages.value = [];
   await loadMessages(id);
 };
 
@@ -757,7 +765,8 @@ const createNewConversation = async (promptInfo = false) => {
     const defaultTitle = t("chat.newConversation");
     const res = await chatAPI.createConversation(defaultTitle);
     await loadConversations();
-    await selectConversation(res.data.id);
+    // 强制重新加载消息，确保不会显示旧数据
+    await selectConversation(res.data.id, true);
     if (promptInfo) {
       await nextTick();
       openInfoDialog();

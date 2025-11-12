@@ -68,16 +68,6 @@ const shouldShowNav = computed(() => {
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-}
-
-/* 首页和关于页可以滚动 */
-.main-content:has(.home-page),
-.main-content:has(.about-page) {
-  overflow-y: auto;
-}
-
-/* 其他页面内容应该在容器内自行处理滚动 */
-.main-content:not(:has(.home-page)):not(:has(.about-page)) {
-  overflow-y: hidden;
+  min-height: 0;
 }
 </style>

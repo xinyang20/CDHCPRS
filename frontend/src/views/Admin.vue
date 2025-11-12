@@ -448,10 +448,9 @@
           </section>
         </div>
       </div>
-    </div>
 
-    <el-dialog
-      v-model="conversationDialogVisible"
+      <el-dialog
+        v-model="conversationDialogVisible"
       width="720px"
       :title="
         t('admin.conversations.dialogTitle', {

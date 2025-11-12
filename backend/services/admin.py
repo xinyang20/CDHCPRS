@@ -142,24 +142,30 @@ def get_conversation_messages_by_admin(db: Session, conversation_id: int) -> Lis
 def delete_conversation_by_admin(db: Session, conversation_id: int) -> None:
     """
     管理员删除对话
-    
+
     Args:
         db: 数据库会话
         conversation_id: 对话 ID
-        
+
     Raises:
         HTTPException: 对话不存在
     """
     conversation = db.query(Conversation)\
         .filter(Conversation.id == conversation_id)\
         .first()
-    
+
     if not conversation:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="对话不存在"
         )
-    
+
+    # 显式删除所有关联的消息（确保即使外键约束未生效也能正确删除）
+    db.query(Message)\
+        .filter(Message.conversation_id == conversation_id)\
+        .delete(synchronize_session=False)
+
+    # 删除对话
     db.delete(conversation)
     db.commit()
 

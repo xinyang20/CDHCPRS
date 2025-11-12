@@ -838,7 +838,8 @@ onUnmounted(() => {
 .chat-layout {
   display: grid;
   grid-template-columns: 300px 1fr;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   background: linear-gradient(135deg, var(--color-bgSecondary) 0%, var(--color-bgPrimary) 50%);
   overflow: hidden;
 }
@@ -944,7 +945,7 @@ onUnmounted(() => {
   background: var(--color-bgPrimary);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
   min-height: 0;
 }
 

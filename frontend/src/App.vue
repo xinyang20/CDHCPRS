@@ -47,9 +47,9 @@ watch(() => route.path, () => {
   }
 }, { immediate: true })
 
-// 所有页面都显示导航栏
+// Chat页面使用独立布局，不显示全局导航栏和页脚
 const shouldShowNav = computed(() => {
-  return true
+  return route.path !== '/chat'
 })
 </script>
 
@@ -76,8 +76,14 @@ const shouldShowNav = computed(() => {
   overflow-y: auto;
 }
 
+/* Chat页面使用独立布局，占满整个视口 */
+.main-content:has(.chat-layout) {
+  overflow: hidden;
+  display: block;
+}
+
 /* 其他页面内容应该在容器内自行处理滚动 */
-.main-content:not(:has(.home-page)):not(:has(.about-page)) {
+.main-content:not(:has(.home-page)):not(:has(.about-page)):not(:has(.chat-layout)) {
   overflow-y: hidden;
 }
 </style>

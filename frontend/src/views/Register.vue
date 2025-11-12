@@ -140,7 +140,7 @@ const handleRegister = async () => {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   background: linear-gradient(
     135deg,
     var(--color-primary) 0%,

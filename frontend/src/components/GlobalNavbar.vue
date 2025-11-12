@@ -22,17 +22,37 @@
         <router-link v-if="userStore.isAdmin()" to="/admin" class="nav-link">
           {{ t('chat.userMenu.admin') }}
         </router-link>
-        <router-link v-if="!userStore.isAuthenticated()" to="/login" class="nav-link">
-          {{ t('home.nav.login') }}
-        </router-link>
-        <a v-if="userStore.isAuthenticated()" @click="handleLogout" class="nav-link" style="cursor: pointer">
-          {{ t('common.actions.logout') }}
-        </a>
       </nav>
 
       <div class="navbar-right">
         <LargeFontModeSwitcher />
         <LanguageSwitcher />
+
+        <router-link v-if="!userStore.isAuthenticated()" to="/login" class="login-button">
+          {{ t('home.nav.login') }}
+        </router-link>
+
+        <el-dropdown v-if="userStore.isAuthenticated()" @command="handleCommand" trigger="click">
+          <div class="user-avatar">
+            <el-avatar :size="36" :style="{ background: 'var(--color-primary)' }">
+              {{ userStore.user?.username?.charAt(0).toUpperCase() || 'U' }}
+            </el-avatar>
+          </div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item disabled>
+                <div class="user-info">
+                  <strong>{{ userStore.user?.username }}</strong>
+                  <span class="user-role">{{ userStore.isAdmin() ? t('profile.roleAdmin') : t('profile.roleUser') }}</span>
+                </div>
+              </el-dropdown-item>
+              <el-dropdown-item divided command="logout">
+                <el-icon><SwitchButton /></el-icon>
+                {{ t('common.actions.logout') }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </div>
   </header>
@@ -43,6 +63,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessageBox } from 'element-plus'
+import { SwitchButton } from '@element-plus/icons-vue'
 import { useUserStore } from '../stores/user'
 import LargeFontModeSwitcher from './LargeFontModeSwitcher.vue'
 import LanguageSwitcher from './LanguageSwitcher.vue'
@@ -54,6 +75,12 @@ const userStore = useUserStore()
 
 const websiteName = ref('')
 const websiteLogo = ref('')
+
+const handleCommand = async (command: string) => {
+  if (command === 'logout') {
+    await handleLogout()
+  }
+}
 
 const handleLogout = async () => {
   try {
@@ -162,6 +189,44 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+}
+
+.login-button {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--color-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-fast);
+}
+
+.login-button:hover {
+  background: var(--color-primaryDark);
+  transform: translateY(-1px);
+}
+
+.user-avatar {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-xs) 0;
+}
+
+.user-info strong {
+  color: var(--color-textPrimary);
+  font-size: var(--font-size-base);
+}
+
+.user-role {
+  color: var(--color-textSecondary);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xs);
 }
 
 @media (max-width: 768px) {

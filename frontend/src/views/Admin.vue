@@ -2,35 +2,40 @@
   <div class="admin-container">
     <BackendStatus />
 
-    <el-container class="admin-layout">
+    <div class="admin-layout">
       <div class="admin-header-section">
         <h2>{{ t("admin.title") }}</h2>
         <p class="header-subtitle">{{ t("admin.subtitle") }}</p>
       </div>
 
-      <el-container>
-        <el-aside width="240px" class="admin-aside">
-          <el-menu
-            :default-active="activeMenu"
-            class="admin-menu"
-            @select="handleMenuSelect"
-          >
-            <el-menu-item index="users">
+      <el-tabs v-model="activeMenu" class="admin-tabs" @tab-click="handleTabClick">
+        <el-tab-pane name="users">
+          <template #label>
+            <span class="tab-label">
               <el-icon><User /></el-icon>
-              <span>{{ t("admin.menu.users") }}</span>
-            </el-menu-item>
-            <el-menu-item index="conversations">
+              {{ t("admin.menu.users") }}
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane name="conversations">
+          <template #label>
+            <span class="tab-label">
               <el-icon><ChatDotRound /></el-icon>
-              <span>{{ t("admin.menu.conversations") }}</span>
-            </el-menu-item>
-            <el-menu-item index="settings">
+              {{ t("admin.menu.conversations") }}
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane name="settings">
+          <template #label>
+            <span class="tab-label">
               <el-icon><Setting /></el-icon>
-              <span>{{ t("admin.menu.settings") }}</span>
-            </el-menu-item>
-          </el-menu>
-        </el-aside>
+              {{ t("admin.menu.settings") }}
+            </span>
+          </template>
+        </el-tab-pane>
+      </el-tabs>
 
-        <el-main class="admin-main">
+      <div class="admin-main">
           <section v-if="activeMenu === 'users'" class="panel">
             <header class="panel-header">
               <div>
@@ -441,9 +446,9 @@
               </el-form>
             </el-card>
           </section>
-        </el-main>
-      </el-container>
-    </el-container>
+        </div>
+      </div>
+    </div>
 
     <el-dialog
       v-model="conversationDialogVisible"
@@ -704,6 +709,10 @@ const formatDate = (value?: string) => {
 
 const handleMenuSelect = (key: string) => {
   activeMenu.value = key as typeof activeMenu.value;
+};
+
+const handleTabClick = () => {
+  // Tab切换由v-model自动处理
 };
 
 const loadUsers = async () => {
@@ -1001,20 +1010,25 @@ onMounted(async () => {
 
 <style scoped>
 .admin-container {
-  height: 100vh;
+  height: 100%;
   background: linear-gradient(120deg, rgba(240, 160, 75, 0.08), #ffffff 45%);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-layout {
-  height: 100vh;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .admin-header-section {
   background: var(--color-bgPrimary);
   padding: var(--spacing-xl) var(--spacing-2xl);
   border-bottom: 1px solid var(--color-borderLight);
-  margin-left: 240px; /* 避免被侧边栏遮挡 */
+  flex-shrink: 0;
 }
 
 .admin-header-section h2 {
@@ -1029,20 +1043,22 @@ onMounted(async () => {
   color: var(--color-textSecondary);
 }
 
-.admin-aside {
-  border-right: 1px solid var(--color-borderPrimary);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
+.admin-tabs {
+  flex-shrink: 0;
+  padding: 0 var(--spacing-2xl);
+  background: var(--color-bgPrimary);
 }
 
-.admin-menu {
-  border-right: none;
-  padding-top: var(--spacing-xl);
+.tab-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .admin-main {
   padding: var(--spacing-2xl);
   background: transparent;
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -1176,14 +1192,12 @@ onMounted(async () => {
 }
 
 @media (max-width: 960px) {
-  .admin-layout {
-    flex-direction: column;
+  .admin-header-section {
+    padding: var(--spacing-lg);
   }
 
-  .admin-aside {
-    width: 100% !important;
-    border-right: none;
-    border-bottom: 1px solid var(--color-borderPrimary);
+  .admin-tabs {
+    padding: 0 var(--spacing-lg);
   }
 
   .admin-main {

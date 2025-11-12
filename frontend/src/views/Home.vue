@@ -1,5 +1,5 @@
 <template>
-  <div class="home-container">
+  <div class="home-container home-page">
     <main class="main-content">
       <section class="hero-section">
         <div class="hero-content">
@@ -9,14 +9,10 @@
             <el-button
               type="primary"
               size="large"
-              @click="$router.push('/register')"
+              @click="$router.push('/login')"
             >
-              <el-icon><UserFilled /></el-icon>
-              {{ t("home.hero.cta") }}
-            </el-button>
-            <el-button size="large" @click="$router.push('/login')">
               <el-icon><Right /></el-icon>
-              {{ t("home.hero.ctaExisting") }}
+              {{ t("home.hero.cta") }}
             </el-button>
           </div>
         </div>

@@ -43,8 +43,7 @@
     "hero": {
       "title": "Chronic Disease Care Assistant",
       "subtitle": "LLM-powered consultation platform delivering professional guidance for chronic conditions",
-      "cta": "Get Started",
-      "ctaExisting": "I already have an account"
+      "cta": "Login"
     },
     "features": {
       "title": "Key Capabilities",

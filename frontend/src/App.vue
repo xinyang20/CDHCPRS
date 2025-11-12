@@ -56,14 +56,28 @@ const shouldShowNav = computed(() => {
 <style>
 #app {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 首页和关于页可以滚动 */
+.main-content:has(.home-page),
+.main-content:has(.about-page) {
+  overflow-y: auto;
+}
+
+/* 其他页面内容应该在容器内自行处理滚动 */
+.main-content:not(:has(.home-page)):not(:has(.about-page)) {
+  overflow-y: hidden;
 }
 </style>

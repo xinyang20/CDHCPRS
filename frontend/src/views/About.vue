@@ -1,21 +1,5 @@
 <template>
-  <div class="about-container">
-    <header class="header">
-      <div class="header-content">
-        <h1 class="logo">{{ websiteName }}</h1>
-        <nav class="nav">
-          <SeniorModeSwitcher />
-          <LanguageSwitcher />
-          <el-button @click="$router.push('/')">{{
-            t("common.actions.back")
-          }}</el-button>
-          <el-button type="primary" @click="$router.push('/login')">{{
-            t("home.nav.login")
-          }}</el-button>
-        </nav>
-      </div>
-    </header>
-
+  <div class="about-container about-page">
     <main class="main-content">
       <section class="intro-section">
         <div class="intro-content">
@@ -101,13 +85,6 @@
         />
       </section>
     </main>
-
-    <footer class="footer">
-      <div class="footer-content">
-        <p>&copy; 2024 {{ websiteName }}. {{ t("home.footer.terms") }}</p>
-      </div>
-    </footer>
-
     <BackendStatus />
   </div>
 </template>
@@ -127,8 +104,6 @@ import {
 } from "@element-plus/icons-vue";
 import api from "../api";
 import BackendStatus from "../components/BackendStatus.vue";
-import LanguageSwitcher from "../components/LanguageSwitcher.vue";
-import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
 
 const { t } = useI18n();
 

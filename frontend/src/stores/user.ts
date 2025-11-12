@@ -32,13 +32,18 @@ export const useUserStore = defineStore('user', () => {
     return user.value?.role === 'admin'
   }
 
+  const isAuthenticated = () => {
+    return !!token.value && !!user.value
+  }
+
   return {
     user,
     token,
     setUser,
     setToken,
     logout,
-    isAdmin
+    isAdmin,
+    isAuthenticated
   }
 })
 

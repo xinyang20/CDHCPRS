@@ -1,9 +1,5 @@
 <template>
   <div class="auth-container">
-    <div class="language-switcher-wrapper">
-      <SeniorModeSwitcher />
-      <LanguageSwitcher />
-    </div>
     <el-card class="auth-card">
       <template #header>
         <div class="card-header">
@@ -65,8 +61,6 @@ import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import type { FormInstance, FormItemRule, FormRules } from "element-plus";
 import { authAPI } from "../api/auth";
-import LanguageSwitcher from "../components/LanguageSwitcher.vue";
-import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -146,7 +140,7 @@ const handleRegister = async () => {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   background: linear-gradient(
     135deg,
     var(--color-primary) 0%,

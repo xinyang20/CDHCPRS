@@ -199,6 +199,7 @@ def get_settings(
         llm_base_url=settings.get("llm_base_url", ""),
         llm_api_key=settings.get("llm_api_key", ""),
         llm_model_id=settings.get("llm_model_id", ""),
+        large_font_scale=float(settings.get("large_font_scale", "1.5")),
     )
 
 
@@ -222,6 +223,10 @@ def update_settings(
 
     settings_dict = settings_data.model_dump(exclude_none=True)
 
+    # 将 large_font_scale 转换为字符串以存储到数据库
+    if "large_font_scale" in settings_dict:
+        settings_dict["large_font_scale"] = str(settings_dict["large_font_scale"])
+
     update_system_settings_with_model_check(db, settings_dict)
 
     all_settings = get_all_settings(db)
@@ -234,6 +239,7 @@ def update_settings(
         llm_base_url=all_settings.get("llm_base_url", ""),
         llm_api_key=all_settings.get("llm_api_key", ""),
         llm_model_id=all_settings.get("llm_model_id", ""),
+        large_font_scale=float(all_settings.get("large_font_scale", "1.5")),
     )
 
 

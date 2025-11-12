@@ -17,14 +17,14 @@ def hash_password(password: str) -> str:
 def init_database():
     """初始化数据库"""
     print("开始初始化数据库...")
-    
+
     # 创建所有表
     Base.metadata.create_all(bind=engine)
-    print("✓ 数据库表创建成功")
-    
+    print("[OK] 数据库表创建成功")
+
     # 创建数据库会话
     db = SessionLocal()
-    
+
     try:
         # 检查是否已有管理员账户
         admin = db.query(User).filter(User.username == "admin").first()
@@ -38,9 +38,9 @@ def init_database():
                 is_banned=False
             )
             db.add(admin)
-            print("✓ 默认管理员账户创建成功 (用户名: admin, 密码: admin123)")
+            print("[OK] 默认管理员账户创建成功 (用户名: admin, 密码: admin123)")
         else:
-            print("✓ 管理员账户已存在")
+            print("[OK] 管理员账户已存在")
         
         # 设置默认系统配置
         default_settings = {
@@ -59,8 +59,8 @@ def init_database():
                 setting = SystemSetting(key=key, value=value)
                 db.add(setting)
         
-        print("✓ 默认系统配置设置成功")
-        
+        print("[OK] 默认系统配置设置成功")
+
         # 提交更改
         db.commit()
         print("\n数据库初始化完成！")
@@ -68,9 +68,9 @@ def init_database():
         print("  用户名: admin")
         print("  密码: admin123")
         print("\n请在生产环境中立即修改默认密码！")
-        
+
     except Exception as e:
-        print(f"✗ 初始化失败: {e}")
+        print(f"[ERROR] 初始化失败: {e}")
         db.rollback()
         raise
     finally:

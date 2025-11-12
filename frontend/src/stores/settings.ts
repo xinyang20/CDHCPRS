@@ -1,36 +1,60 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 
-const SENIOR_MODE_KEY = 'cdhcprs_senior_mode'
+const LARGE_FONT_MODE_KEY = 'cdhcprs_large_font_mode'
 
 export const useSettingsStore = defineStore('settings', () => {
   // 从 localStorage 读取初始值
-  const seniorMode = ref<boolean>(
-    localStorage.getItem(SENIOR_MODE_KEY) === 'true'
+  const largeFontMode = ref<boolean>(
+    localStorage.getItem(LARGE_FONT_MODE_KEY) === 'true'
   )
 
-  // 监听变化并保存到 localStorage
-  watch(seniorMode, (newValue) => {
-    localStorage.setItem(SENIOR_MODE_KEY, String(newValue))
-    // 应用或移除老年版样式
-    if (newValue) {
-      document.documentElement.classList.add('senior-mode')
-    } else {
-      document.documentElement.classList.remove('senior-mode')
-    }
-  }, { immediate: true })
+  // 大字版字体放大倍率（默认1.5，从后端获取）
+  const largeFontScale = ref<number>(1.5)
 
-  const toggleSeniorMode = () => {
-    seniorMode.value = !seniorMode.value
+  // 应用大字版样式
+  const applyLargeFontStyle = () => {
+    // 检查当前路径，如果是 /admin 页面则不应用大字版
+    const isAdminPage = window.location.pathname === '/admin'
+
+    if (largeFontMode.value && !isAdminPage) {
+      const baseFontSize = 16 // 基础字体大小
+      const scaledSize = baseFontSize * largeFontScale.value
+      document.documentElement.style.setProperty('--large-font-size', `${scaledSize}px`)
+      document.documentElement.classList.add('large-font-mode')
+    } else {
+      document.documentElement.classList.remove('large-font-mode')
+    }
   }
 
-  const setSeniorMode = (value: boolean) => {
-    seniorMode.value = value
+  // 监听变化并保存到 localStorage
+  watch(largeFontMode, (newValue) => {
+    localStorage.setItem(LARGE_FONT_MODE_KEY, String(newValue))
+    applyLargeFontStyle()
+  }, { immediate: true })
+
+  // 监听倍率变化
+  watch(largeFontScale, () => {
+    applyLargeFontStyle()
+  })
+
+  const toggleLargeFontMode = () => {
+    largeFontMode.value = !largeFontMode.value
+  }
+
+  const setLargeFontMode = (value: boolean) => {
+    largeFontMode.value = value
+  }
+
+  const setLargeFontScale = (scale: number) => {
+    largeFontScale.value = scale
   }
 
   return {
-    seniorMode,
-    toggleSeniorMode,
-    setSeniorMode
+    largeFontMode,
+    largeFontScale,
+    toggleLargeFontMode,
+    setLargeFontMode,
+    setLargeFontScale
   }
 })

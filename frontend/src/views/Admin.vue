@@ -2,47 +2,40 @@
   <div class="admin-container">
     <BackendStatus />
 
-    <el-container class="admin-layout">
-      <el-header class="admin-header">
-        <div class="header-content">
-          <div class="header-copy">
-            <h2>{{ t("admin.title") }}</h2>
-            <p class="header-subtitle">{{ t("admin.subtitle") }}</p>
-          </div>
-          <div class="header-actions">
-            <SeniorModeSwitcher />
-            <LanguageSwitcher />
-            <el-button type="primary" @click="router.push('/chat')">
-              <el-icon><ChatDotRound /></el-icon>
-              {{ t("common.actions.back") }}
-            </el-button>
-          </div>
-        </div>
-      </el-header>
+    <div class="admin-layout">
+      <div class="admin-header-section">
+        <h2>{{ t("admin.title") }}</h2>
+        <p class="header-subtitle">{{ t("admin.subtitle") }}</p>
+      </div>
 
-      <el-container>
-        <el-aside width="240px" class="admin-aside">
-          <el-menu
-            :default-active="activeMenu"
-            class="admin-menu"
-            @select="handleMenuSelect"
-          >
-            <el-menu-item index="users">
+      <el-tabs v-model="activeMenu" class="admin-tabs" @tab-click="handleTabClick">
+        <el-tab-pane name="users">
+          <template #label>
+            <span class="tab-label">
               <el-icon><User /></el-icon>
-              <span>{{ t("admin.menu.users") }}</span>
-            </el-menu-item>
-            <el-menu-item index="conversations">
+              {{ t("admin.menu.users") }}
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane name="conversations">
+          <template #label>
+            <span class="tab-label">
               <el-icon><ChatDotRound /></el-icon>
-              <span>{{ t("admin.menu.conversations") }}</span>
-            </el-menu-item>
-            <el-menu-item index="settings">
+              {{ t("admin.menu.conversations") }}
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane name="settings">
+          <template #label>
+            <span class="tab-label">
               <el-icon><Setting /></el-icon>
-              <span>{{ t("admin.menu.settings") }}</span>
-            </el-menu-item>
-          </el-menu>
-        </el-aside>
+              {{ t("admin.menu.settings") }}
+            </span>
+          </template>
+        </el-tab-pane>
+      </el-tabs>
 
-        <el-main class="admin-main">
+      <div class="admin-main">
           <section v-if="activeMenu === 'users'" class="panel">
             <header class="panel-header">
               <div>
@@ -301,6 +294,23 @@
                   />
                 </el-form-item>
 
+                <el-form-item
+                  prop="large_font_scale"
+                  :label="t('admin.settings.largeFontScale')"
+                >
+                  <el-input-number
+                    v-model="settingsForm.large_font_scale"
+                    :min="1.2"
+                    :max="3.0"
+                    :step="0.1"
+                    :precision="1"
+                    :placeholder="t('admin.settings.largeFontScalePlaceholder')"
+                  />
+                  <el-text size="small" type="info" style="margin-left: 12px">{{
+                    t("admin.settings.largeFontScaleTips")
+                  }}</el-text>
+                </el-form-item>
+
                 <el-divider content-position="left">{{
                   t("admin.settings.llm")
                 }}</el-divider>
@@ -329,6 +339,7 @@
                         <el-option label="Qwen" value="qwen" />
                         <el-option label="OpenAI" value="openai" />
                         <el-option label="OpenAIful" value="openaiful" />
+                        <el-option label="Dify" value="dify" />
                       </el-select>
                     </el-form-item>
                   </el-col>
@@ -361,28 +372,28 @@
                     </el-form-item>
                   </el-col>
 
-                  <el-col :xs="24" :md="12" class="model-actions">
-                    <div class="inline-actions">
-                      <el-button
-                        type="primary"
-                        plain
-                        :loading="fetchingModels"
-                        :disabled="!canFetchModels"
-                        @click="handleFetchModels"
-                      >
-                        <el-icon><Search /></el-icon>
-                        {{ t("admin.settings.fetchModels") }}
-                      </el-button>
-                      <el-button
-                        type="success"
-                        plain
-                        :loading="testingConnection"
-                        @click="handleTestConnection"
-                      >
-                        <el-icon><Link /></el-icon>
-                        {{ t("admin.settings.testLink") }}
-                      </el-button>
-                    </div>
+                  <el-col :xs="24" :md="12">
+                    <el-form-item label=" ">
+                      <div class="inline-actions">
+                        <el-button
+                          plain
+                          :loading="fetchingModels"
+                          :disabled="!canFetchModels"
+                          @click="handleFetchModels"
+                        >
+                          <el-icon><Search /></el-icon>
+                          {{ t("common.actions.fetchModels") }}
+                        </el-button>
+                        <el-button
+                          plain
+                          :loading="testingConnection"
+                          @click="handleTestConnection"
+                        >
+                          <el-icon><Link /></el-icon>
+                          {{ t("common.actions.test") }}
+                        </el-button>
+                      </div>
+                    </el-form-item>
                   </el-col>
 
                   <el-col :xs="24" :md="12">
@@ -435,12 +446,11 @@
               </el-form>
             </el-card>
           </section>
-        </el-main>
-      </el-container>
-    </el-container>
+        </div>
+      </div>
 
-    <el-dialog
-      v-model="conversationDialogVisible"
+      <el-dialog
+        v-model="conversationDialogVisible"
       width="720px"
       :title="
         t('admin.conversations.dialogTitle', {
@@ -513,8 +523,6 @@ import {
 } from "element-plus";
 
 import BackendStatus from "../components/BackendStatus.vue";
-import LanguageSwitcher from "../components/LanguageSwitcher.vue";
-import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
 import MarkdownRenderer from "../components/MarkdownRenderer.vue";
 import {
   adminAPI,
@@ -557,6 +565,7 @@ const settingsForm = reactive<
   website_name: "",
   website_logo: "",
   system_prompt: "",
+  large_font_scale: 1.5,
   llm_provider: "deepseek",
   llm_base_url: "",
   llm_api_key: "",
@@ -574,11 +583,11 @@ const providerDefaults: Record<string, string> = {
 };
 
 const isBaseUrlRequired = computed(
-  () => settingsForm.llm_provider === "openaiful"
+  () => settingsForm.llm_provider === "openaiful" || settingsForm.llm_provider === "dify"
 );
 
 const baseUrlPlaceholder = computed(() => {
-  if (settingsForm.llm_provider === "openaiful") {
+  if (settingsForm.llm_provider === "openaiful" || settingsForm.llm_provider === "dify") {
     return t("admin.settings.baseUrlRequiredPlaceholder");
   }
   const preset =
@@ -592,7 +601,7 @@ const canFetchModels = computed(() => {
   if (!settingsForm.llm_provider || !settingsForm.llm_api_key?.trim()) {
     return false;
   }
-  if (settingsForm.llm_provider === "openaiful") {
+  if (settingsForm.llm_provider === "openaiful" || settingsForm.llm_provider === "dify") {
     return Boolean(settingsForm.llm_base_url?.trim());
   }
   return true;
@@ -699,6 +708,10 @@ const formatDate = (value?: string) => {
 
 const handleMenuSelect = (key: string) => {
   activeMenu.value = key as typeof activeMenu.value;
+};
+
+const handleTabClick = () => {
+  // Tab切换由v-model自动处理
 };
 
 const loadUsers = async () => {
@@ -967,6 +980,7 @@ const submitSettings = async () => {
       website_name: settingsForm.website_name,
       website_logo: settingsForm.website_logo,
       system_prompt: settingsForm.system_prompt,
+      large_font_scale: settingsForm.large_font_scale,
       llm_provider: settingsForm.llm_provider,
       llm_base_url: settingsForm.llm_base_url,
       llm_api_key: settingsForm.llm_api_key,
@@ -995,34 +1009,28 @@ onMounted(async () => {
 
 <style scoped>
 .admin-container {
-  height: 100vh;
+  height: 100%;
   background: linear-gradient(120deg, rgba(240, 160, 75, 0.08), #ffffff 45%);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-layout {
-  height: 100vh;
-}
-
-.admin-header {
-  background: transparent;
-  padding: var(--spacing-lg) var(--spacing-2xl);
-  border-bottom: 1px solid var(--color-borderPrimary);
-}
-
-.header-content {
+  height: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
+.admin-header-section {
+  background: var(--color-bgPrimary);
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  border-bottom: 1px solid var(--color-borderLight);
+  flex-shrink: 0;
 }
 
-.header-copy h2 {
+.admin-header-section h2 {
   margin: 0;
   color: var(--color-primaryDark);
   font-size: var(--font-size-3xl);
@@ -1034,20 +1042,22 @@ onMounted(async () => {
   color: var(--color-textSecondary);
 }
 
-.admin-aside {
-  border-right: 1px solid var(--color-borderPrimary);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
+.admin-tabs {
+  flex-shrink: 0;
+  padding: 0 var(--spacing-2xl);
+  background: var(--color-bgPrimary);
 }
 
-.admin-menu {
-  border-right: none;
-  padding-top: var(--spacing-xl);
+.tab-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .admin-main {
   padding: var(--spacing-2xl);
   background: transparent;
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -1126,18 +1136,12 @@ onMounted(async () => {
   display: flex;
   gap: var(--spacing-sm);
   justify-content: flex-start;
-  margin-top: var(--spacing-sm);
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
   margin-top: var(--spacing-xl);
-}
-
-.model-actions {
-  display: flex;
-  align-items: flex-end;
 }
 
 .conversation-timeline {
@@ -1187,14 +1191,12 @@ onMounted(async () => {
 }
 
 @media (max-width: 960px) {
-  .admin-layout {
-    flex-direction: column;
+  .admin-header-section {
+    padding: var(--spacing-lg);
   }
 
-  .admin-aside {
-    width: 100% !important;
-    border-right: none;
-    border-bottom: 1px solid var(--color-borderPrimary);
+  .admin-tabs {
+    padding: 0 var(--spacing-lg);
   }
 
   .admin-main {

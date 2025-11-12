@@ -62,7 +62,7 @@
 
       <div class="sidebar-footer">
         <div class="footer-switches">
-          <SeniorModeSwitcher />
+          <LargeFontModeSwitcher />
           <LanguageSwitcher />
         </div>
         <el-dropdown trigger="click">
@@ -439,7 +439,7 @@ import { useUserStore } from "../stores/user";
 import BackendStatus from "../components/BackendStatus.vue";
 import MarkdownRenderer from "../components/MarkdownRenderer.vue";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
-import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
+import LargeFontModeSwitcher from "../components/LargeFontModeSwitcher.vue";
 import {
   DISEASES,
   getSymptomsByDiseases,
@@ -1473,6 +1473,17 @@ onUnmounted(() => {
 
   .main-content {
     height: 100vh;
+  }
+}
+
+/* 大字版模式下扩大侧边栏宽度 */
+html.large-font-mode .chat-layout {
+  grid-template-columns: 400px 1fr;
+}
+
+@media (max-width: 1200px) and (min-width: 961px) {
+  html.large-font-mode .chat-layout {
+    grid-template-columns: 340px 1fr;
   }
 }
 </style>

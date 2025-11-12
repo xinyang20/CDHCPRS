@@ -56,6 +56,12 @@ router.beforeEach(async (to, _from, next) => {
   const userStore = useUserStore();
   const token = localStorage.getItem("token");
 
+  // 如果用户已登录且尝试访问登录/注册页面，重定向到首页
+  if (token && (to.path === "/login" || to.path === "/register")) {
+    next("/");
+    return;
+  }
+
   if (to.meta.requiresAuth && !token) {
     next("/login");
     return;

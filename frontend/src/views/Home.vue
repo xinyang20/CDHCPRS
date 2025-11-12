@@ -1,27 +1,5 @@
 <template>
-  <div class="home-container">
-    <header class="header">
-      <div class="header-content">
-        <h1 class="logo">{{ websiteName }}</h1>
-        <nav class="nav">
-          <SeniorModeSwitcher />
-          <LanguageSwitcher />
-          <el-button text @click="scrollToSection('features')">{{
-            t("home.nav.features")
-          }}</el-button>
-          <el-button text @click="scrollToSection('about')">{{
-            t("home.nav.about")
-          }}</el-button>
-          <el-button @click="$router.push('/login')">{{
-            t("home.nav.login")
-          }}</el-button>
-          <el-button type="primary" @click="$router.push('/register')">{{
-            t("home.nav.register")
-          }}</el-button>
-        </nav>
-      </div>
-    </header>
-
+  <div class="home-container home-page">
     <main class="main-content">
       <section class="hero-section">
         <div class="hero-content">
@@ -31,14 +9,10 @@
             <el-button
               type="primary"
               size="large"
-              @click="$router.push('/register')"
+              @click="$router.push('/login')"
             >
-              <el-icon><UserFilled /></el-icon>
-              {{ t("home.hero.cta") }}
-            </el-button>
-            <el-button size="large" @click="$router.push('/login')">
               <el-icon><Right /></el-icon>
-              {{ t("home.hero.ctaExisting") }}
+              {{ t("home.hero.cta") }}
             </el-button>
           </div>
         </div>
@@ -81,19 +55,6 @@
         </div>
       </section>
     </main>
-
-    <footer class="footer">
-      <div class="footer-content">
-        <p>&copy; 2024 {{ websiteName }}. {{ t("home.footer.terms") }}</p>
-        <div class="footer-links">
-          <el-button text @click="$router.push('/about')">{{
-            t("home.footer.privacy")
-          }}</el-button>
-          <el-button text>{{ t("home.footer.terms") }}</el-button>
-        </div>
-      </div>
-    </footer>
-
     <BackendStatus />
   </div>
 </template>
@@ -114,8 +75,6 @@ import {
 } from "@element-plus/icons-vue";
 import api from "../api";
 import BackendStatus from "../components/BackendStatus.vue";
-import LanguageSwitcher from "../components/LanguageSwitcher.vue";
-import SeniorModeSwitcher from "../components/SeniorModeSwitcher.vue";
 
 const { t } = useI18n();
 

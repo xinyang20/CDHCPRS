@@ -23,9 +23,11 @@ def get_public_settings(db: Session = Depends(get_db)):
     """
     website_name = get_setting(db, "website_name") or "慢性病诊疗方案推荐系统"
     website_logo = get_setting(db, "website_logo") or ""
-    
+    large_font_scale = float(get_setting(db, "large_font_scale") or "1.5")
+
     return PublicSettings(
         website_name=website_name,
-        website_logo=website_logo
+        website_logo=website_logo,
+        large_font_scale=large_font_scale
     )
 

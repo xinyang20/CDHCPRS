@@ -39,6 +39,10 @@ _PROVIDER_REGISTRY: Dict[str, ProviderConfig] = {
         key="openaiful",
         requires_base_url=True,
     ),
+    "dify": ProviderConfig(
+        key="dify",
+        requires_base_url=True,
+    ),
 }
 
 

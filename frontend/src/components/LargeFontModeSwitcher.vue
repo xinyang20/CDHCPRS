@@ -1,11 +1,11 @@
 <template>
-  <div class="senior-mode-switcher">
-    <span class="label">{{ t('seniorMode.label') }}</span>
+  <div class="large-font-mode-switcher">
+    <span class="label">{{ t('largeFontMode.label') }}</span>
     <el-switch
-      v-model="isSeniorMode"
+      v-model="isLargeFontMode"
       size="small"
-      :active-text="t('seniorMode.on')"
-      :inactive-text="t('seniorMode.off')"
+      :active-text="t('largeFontMode.on')"
+      :inactive-text="t('largeFontMode.off')"
       inline-prompt
     />
   </div>
@@ -19,14 +19,14 @@ import { useSettingsStore } from '../stores/settings'
 const { t } = useI18n()
 const settingsStore = useSettingsStore()
 
-const isSeniorMode = computed({
-  get: () => settingsStore.seniorMode,
-  set: (value: boolean) => settingsStore.setSeniorMode(value)
+const isLargeFontMode = computed({
+  get: () => settingsStore.largeFontMode,
+  set: (value: boolean) => settingsStore.setLargeFontMode(value)
 })
 </script>
 
 <style scoped>
-.senior-mode-switcher {
+.large-font-mode-switcher {
   display: flex;
   align-items: center;
   gap: 12px;

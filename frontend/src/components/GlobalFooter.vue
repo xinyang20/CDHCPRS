@@ -2,6 +2,9 @@
   <footer class="global-footer">
     <div class="footer-container">
       <div class="footer-content">
+        <p class="footer-disclaimer">
+          本系统不提供医疗建议与方剂，如身体不适，请立即前往医院就诊。
+        </p>
         <p class="footer-text">
           © {{ currentYear }} {{ websiteName }}. All rights reserved.
         </p>
@@ -50,6 +53,13 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   text-align: center;
+}
+
+.footer-disclaimer {
+  color: var(--color-warning);
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--spacing-xs) 0;
+  font-weight: 600;
 }
 
 .footer-text {

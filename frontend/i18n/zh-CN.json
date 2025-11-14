@@ -87,7 +87,7 @@
     }
   },
   "chat": {
-    "title": "智能对话",
+    "title": "智能问诊",
     "sidebarTagline": "国风智能问诊助手",
     "newConversation": "新建对话",
     "refresh": "刷新",

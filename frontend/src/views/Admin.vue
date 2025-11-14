@@ -3,11 +3,6 @@
     <BackendStatus />
 
     <div class="admin-layout">
-      <div class="admin-header-section">
-        <h2>{{ t("admin.title") }}</h2>
-        <p class="header-subtitle">{{ t("admin.subtitle") }}</p>
-      </div>
-
       <el-tabs v-model="activeMenu" class="admin-tabs" @tab-click="handleTabClick">
         <el-tab-pane name="users">
           <template #label>
@@ -1155,6 +1150,12 @@ onMounted(async () => {
     return;
   }
 
+  // 从 query 参数获取要显示的 tab
+  const tabQuery = router.currentRoute.value.query.tab as string;
+  if (tabQuery && ['users', 'conversations', 'settings'].includes(tabQuery)) {
+    activeMenu.value = tabQuery as typeof activeMenu.value;
+  }
+
   await Promise.all([loadUsers(), loadConversations(), loadSettings()]);
 });
 </script>
@@ -1173,25 +1174,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.admin-header-section {
-  background: var(--color-bgPrimary);
-  padding: var(--spacing-xl) var(--spacing-2xl);
-  border-bottom: 1px solid var(--color-borderLight);
-  flex-shrink: 0;
-}
-
-.admin-header-section h2 {
-  margin: 0;
-  color: var(--color-primaryDark);
-  font-size: var(--font-size-3xl);
-  font-weight: 700;
-}
-
-.header-subtitle {
-  margin: var(--spacing-xs) 0 0;
-  color: var(--color-textSecondary);
+  padding-top: var(--spacing-xl);
 }
 
 .admin-tabs {

@@ -262,12 +262,15 @@ body {
   }
 }
 
-/* 大字版模式 - 使用动态字体大小 */
-html.large-font-mode {
-  font-size: var(--large-font-size, 24px); /* 默认 16px * 1.5 = 24px */
+/* 大字版模式 - 使用transform缩放所有元素 */
+html.large-font-mode body {
+  transform-origin: top center;
+  transform: scale(var(--large-font-scale, 1.5));
+  width: calc(100% / var(--large-font-scale, 1.5));
+  min-height: calc(100vh / var(--large-font-scale, 1.5));
 }
 
-html.large-font-mode body {
-  font-size: var(--large-font-size, 24px);
+html.large-font-mode {
+  overflow-x: hidden;
 }
 

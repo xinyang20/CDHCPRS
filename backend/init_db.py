@@ -51,6 +51,30 @@ def init_database():
             "llm_base_url": "https://api.deepseek.com/v1",
             "llm_api_key": "",
             "llm_model_id": "deepseek-chat",
+            "large_font_scale": "1.5",
+            # 推荐问题配置
+            "suggested_questions_enabled": "false",
+            "suggested_questions_provider": "deepseek",
+            "suggested_questions_base_url": "",
+            "suggested_questions_api_key": "",
+            "suggested_questions_model_id": "",
+            "suggested_questions_system_prompt": """你是一个智能助手，负责根据用户的对话历史，推测用户接下来可能想问的问题。
+
+请仔细分析对话内容，生成3个用户可能感兴趣的后续问题。这些问题应该：
+1. 与当前对话主题紧密相关
+2. 具有延续性和深入性
+3. 简洁明了，易于理解
+
+请以 JSON 数组格式返回问题列表，例如：
+["问题1", "问题2", "问题3"]
+
+或者使用编号列表格式：
+1. 问题1
+2. 问题2
+3. 问题3""",
+            "suggested_questions_count": "3",
+            "suggested_questions_max_rounds": "5",
+            "suggested_questions_template_questions": '["如何改善症状？", "需要注意什么饮食？", "有什么锻炼建议？", "药物治疗的副作用有哪些？", "病情恢复需要多长时间？"]',
         }
         
         for key, value in default_settings.items():

@@ -33,6 +33,16 @@ export interface AdminSettingsResponse {
   llm_api_key: string
   llm_model_id: string
   llm_model_name: string
+  large_font_scale: number
+  suggested_questions_enabled: string
+  suggested_questions_provider: string
+  suggested_questions_base_url: string
+  suggested_questions_api_key: string
+  suggested_questions_model_id: string
+  suggested_questions_system_prompt: string
+  suggested_questions_count: string
+  suggested_questions_max_rounds: string
+  suggested_questions_template_questions: string
 }
 
 export interface AdminSettingsUpdatePayload {
@@ -44,6 +54,16 @@ export interface AdminSettingsUpdatePayload {
   llm_api_key?: string
   llm_model_id?: string
   llm_model_name?: string
+  large_font_scale?: number
+  suggested_questions_enabled?: string
+  suggested_questions_provider?: string
+  suggested_questions_base_url?: string
+  suggested_questions_api_key?: string
+  suggested_questions_model_id?: string
+  suggested_questions_system_prompt?: string
+  suggested_questions_count?: string
+  suggested_questions_max_rounds?: string
+  suggested_questions_template_questions?: string
 }
 
 export interface TestConnectionPayload {

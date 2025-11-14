@@ -433,6 +433,133 @@
                   </el-col>
                 </el-row>
 
+                <el-divider content-position="left">
+                  推荐问题配置（猜你想问）
+                </el-divider>
+
+                <el-form-item label="启用推荐问题">
+                  <el-switch
+                    v-model="suggestedQuestionsEnabled"
+                    active-value="true"
+                    inactive-value="false"
+                    @change="handleSuggestedQuestionsToggle"
+                  />
+                  <el-text size="small" type="info" style="margin-left: 12px">
+                    开启后，将在对话输入框上方显示AI推荐的问题
+                  </el-text>
+                </el-form-item>
+
+                <div v-if="suggestedQuestionsEnabled === 'true'" class="suggested-questions-config">
+                  <el-alert
+                    title="推荐问题说明"
+                    type="info"
+                    show-icon
+                    :closable="false"
+                    class="mb-lg"
+                  >
+                    推荐问题功能使用独立的LLM配置。如果不填写，则使用主对话配置。模板问题用于降级场景。
+                  </el-alert>
+
+                  <el-row :gutter="24" class="llm-grid">
+                    <el-col :xs="24" :md="12">
+                      <el-form-item label="推荐数量">
+                        <el-input-number
+                          v-model.number="settingsForm.suggested_questions_count"
+                          :min="1"
+                          :max="10"
+                          class="full-width"
+                        />
+                      </el-form-item>
+                    </el-col>
+
+                    <el-col :xs="24" :md="12">
+                      <el-form-item label="最大轮数">
+                        <el-input-number
+                          v-model.number="settingsForm.suggested_questions_max_rounds"
+                          :min="1"
+                          :max="20"
+                          class="full-width"
+                        />
+                        <el-text size="small" type="info" style="display: block; margin-top: 4px">
+                          包含的对话轮数（用于生成推荐问题）
+                        </el-text>
+                      </el-form-item>
+                    </el-col>
+
+                    <el-col :xs="24" :md="12">
+                      <el-form-item label="LLM 供应商">
+                        <el-select
+                          v-model="settingsForm.suggested_questions_provider"
+                          class="full-width"
+                          placeholder="留空则使用主配置"
+                        >
+                          <el-option label="使用主配置" value="" />
+                          <el-option label="DeepSeek" value="deepseek" />
+                          <el-option label="Qwen" value="qwen" />
+                          <el-option label="OpenAI" value="openai" />
+                          <el-option label="OpenAIful" value="openaiful" />
+                          <el-option label="Dify" value="dify" />
+                        </el-select>
+                      </el-form-item>
+                    </el-col>
+
+                    <el-col :xs="24" :md="12">
+                      <el-form-item label="Base URL">
+                        <el-input
+                          v-model="settingsForm.suggested_questions_base_url"
+                          placeholder="留空则使用主配置"
+                          clearable
+                        />
+                      </el-form-item>
+                    </el-col>
+
+                    <el-col :xs="24" :md="12">
+                      <el-form-item label="API Key">
+                        <el-input
+                          v-model="settingsForm.suggested_questions_api_key"
+                          type="password"
+                          show-password
+                          placeholder="留空则使用主配置"
+                        />
+                      </el-form-item>
+                    </el-col>
+
+                    <el-col :xs="24" :md="12">
+                      <el-form-item label="模型 ID">
+                        <el-input
+                          v-model="settingsForm.suggested_questions_model_id"
+                          placeholder="留空则使用主配置"
+                        />
+                      </el-form-item>
+                    </el-col>
+
+                    <el-col :xs="24">
+                      <el-form-item label="系统提示词">
+                        <el-input
+                          v-model="settingsForm.suggested_questions_system_prompt"
+                          type="textarea"
+                          :rows="6"
+                          placeholder="用于指导大模型生成推荐问题"
+                        />
+                      </el-form-item>
+                    </el-col>
+
+                    <el-col :xs="24">
+                      <el-form-item label="模板问题（降级方案）">
+                        <el-input
+                          v-model="settingsForm.suggested_questions_template_questions"
+                          type="textarea"
+                          :rows="4"
+                          placeholder='JSON数组格式，例如：["问题1", "问题2", "问题3"]'
+                        />
+                        <el-text size="small" type="info" style="display: block; margin-top: 4px">
+                          当大模型无法生成推荐问题时，随机从这里选择
+                        </el-text>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                </div>
+
                 <div class="form-actions">
                   <el-button
                     type="primary"
@@ -560,6 +687,15 @@ const settingsForm = reactive<
     llm_provider: string;
     llm_model_id: string;
     llm_model_name: string;
+    suggested_questions_enabled?: string;
+    suggested_questions_provider?: string;
+    suggested_questions_base_url?: string;
+    suggested_questions_api_key?: string;
+    suggested_questions_model_id?: string;
+    suggested_questions_system_prompt?: string;
+    suggested_questions_count?: string;
+    suggested_questions_max_rounds?: string;
+    suggested_questions_template_questions?: string;
   }
 >({
   website_name: "",
@@ -571,9 +707,19 @@ const settingsForm = reactive<
   llm_api_key: "",
   llm_model_id: "",
   llm_model_name: "",
+  suggested_questions_enabled: "false",
+  suggested_questions_provider: "",
+  suggested_questions_base_url: "",
+  suggested_questions_api_key: "",
+  suggested_questions_model_id: "",
+  suggested_questions_system_prompt: "",
+  suggested_questions_count: "3",
+  suggested_questions_max_rounds: "5",
+  suggested_questions_template_questions: "[]",
 });
 
 const settingsFormRef = ref<FormInstance>();
+const suggestedQuestionsEnabled = ref<"true" | "false">("false");
 let previousProvider = settingsForm.llm_provider;
 
 const providerDefaults: Record<string, string> = {
@@ -756,6 +902,12 @@ const applySettingsResponse = (settings: AdminSettingsResponse) => {
   if (!settingsForm.llm_model_id && settingsForm.llm_model_name) {
     settingsForm.llm_model_id = settingsForm.llm_model_name;
   }
+  // 更新推荐问题开关状态
+  suggestedQuestionsEnabled.value = settings.suggested_questions_enabled === "true" ? "true" : "false";
+};
+
+const handleSuggestedQuestionsToggle = (value: "true" | "false") => {
+  settingsForm.suggested_questions_enabled = value;
 };
 
 const banUser = async (userId: number) => {

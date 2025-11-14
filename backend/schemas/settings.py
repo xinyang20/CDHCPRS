@@ -41,6 +41,17 @@ class AdminSettings(BaseModel):
     llm_model_name: str = Field(default="", description="LLM 模型名称（用于展示或备用）")
     large_font_scale: float = Field(default=1.5, description="大字版字体放大倍率")
 
+    # 推荐问题配置
+    suggested_questions_enabled: str = Field(default="false", description="是否启用推荐问题功能")
+    suggested_questions_provider: str = Field(default="", description="推荐问题 LLM 供应商")
+    suggested_questions_base_url: str = Field(default="", description="推荐问题 LLM 基础 URL")
+    suggested_questions_api_key: str = Field(default="", description="推荐问题 LLM API Key")
+    suggested_questions_model_id: str = Field(default="", description="推荐问题 LLM 模型 ID")
+    suggested_questions_system_prompt: str = Field(default="", description="推荐问题系统提示词")
+    suggested_questions_count: str = Field(default="3", description="推荐问题数量")
+    suggested_questions_max_rounds: str = Field(default="5", description="最大消息轮数")
+    suggested_questions_template_questions: str = Field(default="[]", description="模板问题（JSON 数组）")
+
 
 class AdminSettingsUpdate(BaseModel):
     """管理员设置更新 Schema"""
@@ -54,6 +65,17 @@ class AdminSettingsUpdate(BaseModel):
     llm_model_id: Optional[str] = Field(None, description="LLM 模型 ID")
     llm_model_name: Optional[str] = Field(None, description="LLM 模型名称（用于展示或备用）")
     large_font_scale: Optional[float] = Field(None, description="大字版字体放大倍率")
+
+    # 推荐问题配置
+    suggested_questions_enabled: Optional[str] = Field(None, description="是否启用推荐问题功能")
+    suggested_questions_provider: Optional[str] = Field(None, description="推荐问题 LLM 供应商")
+    suggested_questions_base_url: Optional[str] = Field(None, description="推荐问题 LLM 基础 URL")
+    suggested_questions_api_key: Optional[str] = Field(None, description="推荐问题 LLM API Key")
+    suggested_questions_model_id: Optional[str] = Field(None, description="推荐问题 LLM 模型 ID")
+    suggested_questions_system_prompt: Optional[str] = Field(None, description="推荐问题系统提示词")
+    suggested_questions_count: Optional[str] = Field(None, description="推荐问题数量")
+    suggested_questions_max_rounds: Optional[str] = Field(None, description="最大消息轮数")
+    suggested_questions_template_questions: Optional[str] = Field(None, description="模板问题（JSON 数组）")
 
 
 class TestConnectionRequest(BaseModel):

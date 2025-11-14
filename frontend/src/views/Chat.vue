@@ -275,6 +275,11 @@
             </template>
           </el-alert>
 
+          <SuggestedQuestions
+            :questions="suggestedQuestions"
+            @select-question="handleSuggestedQuestion"
+          />
+
           <el-input
             v-model="inputMessage"
             type="textarea"
@@ -440,6 +445,7 @@ import BackendStatus from "../components/BackendStatus.vue";
 import MarkdownRenderer from "../components/MarkdownRenderer.vue";
 import LanguageSwitcher from "../components/LanguageSwitcher.vue";
 import LargeFontModeSwitcher from "../components/LargeFontModeSwitcher.vue";
+import SuggestedQuestions from "../components/SuggestedQuestions.vue";
 import {
   DISEASES,
   getSymptomsByDiseases,
@@ -500,6 +506,9 @@ const infoDialogVisible = ref(false);
 const infoFormRef = ref<FormInstance>();
 const infoForm = reactive<PatientProfile>(buildDefaultProfile());
 const shouldAttachUserInfo = ref(false);
+
+// 推荐问题
+const suggestedQuestions = ref<string[]>([]);
 
 const infoRules: FormRules = {
   age: [
@@ -750,6 +759,8 @@ const selectConversation = async (id: number) => {
   if (currentConversationId.value === id) return;
   currentConversationId.value = id;
   await loadMessages(id);
+  // 加载推荐问题
+  await loadSuggestedQuestions();
 };
 
 const createNewConversation = async (promptInfo = false) => {
@@ -898,7 +909,30 @@ const sendMessage = async () => {
       shouldAttachUserInfo.value = false;
     }
     await scrollToBottom();
+    // 加载推荐问题
+    if (sendSuccess && currentConversationId.value) {
+      await loadSuggestedQuestions();
+    }
   }
+};
+
+const loadSuggestedQuestions = async () => {
+  if (!currentConversationId.value) return;
+
+  try {
+    const response = await chatAPI.getSuggestedQuestions(currentConversationId.value);
+    suggestedQuestions.value = response.data.questions || [];
+  } catch (error) {
+    console.error("Failed to load suggested questions:", error);
+    // 静默失败，不影响用户体验
+    suggestedQuestions.value = [];
+  }
+};
+
+const handleSuggestedQuestion = (question: string) => {
+  inputMessage.value = question;
+  // 可选：自动发送
+  // sendMessage();
 };
 
 const handleLogout = () => {

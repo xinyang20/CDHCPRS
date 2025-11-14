@@ -132,11 +132,10 @@ onMounted(async () => {
 
 <style scoped>
 .home-container {
-  height: 100vh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   background: var(--color-bgPrimary);
-  overflow: hidden;
 }
 
 .header {
@@ -171,8 +170,6 @@ onMounted(async () => {
 
 .main-content {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .hero-section {

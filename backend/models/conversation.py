@@ -9,9 +9,10 @@ from core.database import Base
 
 class Conversation(Base):
     """对话模型"""
-    
+
     __tablename__ = "conversations"
-    
+    __table_args__ = {'sqlite_autoincrement': True}  # 确保SQLite使用AUTOINCREMENT，防止ID复用
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     title = Column(String, nullable=False)

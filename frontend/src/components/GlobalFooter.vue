@@ -5,11 +5,6 @@
         <p class="footer-text">
           © {{ currentYear }} {{ websiteName }}. All rights reserved.
         </p>
-        <div class="footer-links">
-          <a href="#" class="footer-link">{{ t('home.footer.privacy') }}</a>
-          <span class="footer-separator">·</span>
-          <a href="#" class="footer-link">{{ t('home.footer.terms') }}</a>
-        </div>
       </div>
     </div>
   </footer>
@@ -40,21 +35,20 @@ onMounted(async () => {
 .global-footer {
   background: var(--color-bgSecondary);
   border-top: 1px solid var(--color-borderLight);
-  padding: var(--spacing-xl) 0;
+  padding: 0;
   margin-top: auto;
 }
 
 .footer-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-lg);
 }
 
 .footer-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-sm);
   text-align: center;
 }
 

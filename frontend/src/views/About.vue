@@ -155,11 +155,10 @@ onMounted(async () => {
 
 <style scoped>
 .about-container {
-  height: 100vh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   background: var(--color-bgSecondary);
-  overflow: hidden;
 }
 
 .header {
@@ -198,8 +197,6 @@ onMounted(async () => {
   width: 100%;
   margin: 0 auto;
   padding: var(--spacing-4xl) var(--spacing-xl);
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .intro-section {

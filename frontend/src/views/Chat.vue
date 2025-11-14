@@ -60,34 +60,6 @@
         </div>
       </el-scrollbar>
 
-      <div class="sidebar-footer">
-        <div class="footer-switches">
-          <LargeFontModeSwitcher />
-          <LanguageSwitcher />
-        </div>
-        <el-dropdown trigger="click">
-          <span class="user-info">
-            <el-avatar size="small" icon="User" />
-            <span class="user-name">{{ userStore.user?.username }}</span>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="$router.push('/profile')">
-                {{ t("chat.userMenu.profile") }}
-              </el-dropdown-item>
-              <el-dropdown-item
-                v-if="userStore.isAdmin()"
-                @click="$router.push('/admin')"
-              >
-                {{ t("chat.userMenu.admin") }}
-              </el-dropdown-item>
-              <el-dropdown-item divided @click="handleLogout">
-                {{ t("chat.userMenu.logout") }}
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
     </aside>
 
     <main class="main-content">
@@ -123,102 +95,7 @@
               {{ t("common.status.disabled") }}
             </el-tag>
           </div>
-          <div class="chat-actions">
-            <el-button
-              text
-              size="small"
-              :icon="Refresh"
-              @click="refreshConversation"
-            >
-              {{ t("chat.refresh") }}
-            </el-button>
-            <el-button text size="small" :icon="User" @click="openInfoDialog">
-              {{ t("chat.patientProfile") }}
-            </el-button>
-          </div>
         </header>
-
-        <section class="patient-info-card">
-          <div class="card-header">
-            <div>
-              <h3>{{ t("chat.patientProfile") }}</h3>
-              <p class="card-subtitle">{{ t("chat.patientProfileHint") }}</p>
-            </div>
-            <el-button
-              type="primary"
-              text
-              :icon="EditPen"
-              @click="openInfoDialog"
-            >
-              {{ t("chat.updateInfo") }}
-            </el-button>
-          </div>
-
-          <div v-if="hasPatientInfo" class="info-body">
-            <el-descriptions :column="2" border size="small">
-              <el-descriptions-item :label="t('chat.age')">
-                {{ currentProfile.age || t("chat.fillInfo") }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('chat.gender')">
-                {{ genderLabel(currentProfile.gender) }}
-              </el-descriptions-item>
-              <el-descriptions-item
-                v-if="currentProfile.diseases && currentProfile.diseases.length > 0"
-                :label="t('chat.diseaseHistory')"
-                :span="2"
-              >
-                <el-tag
-                  v-for="diseaseId in currentProfile.diseases"
-                  :key="diseaseId"
-                  type="warning"
-                  size="small"
-                  class="disease-tag"
-                >
-                  {{ DISEASES.find(d => d.id === diseaseId)?.name }}
-                </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item
-                v-if="currentProfile.symptoms && currentProfile.symptoms.length > 0"
-                :label="t('chat.recentSymptoms')"
-                :span="2"
-              >
-                <el-tag
-                  v-for="symptom in currentProfile.symptoms"
-                  :key="symptom"
-                  type="info"
-                  size="small"
-                  class="symptom-tag-display"
-                >
-                  {{ symptom }}
-                </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item
-                v-if="currentProfile.tcmSyndrome"
-                :label="t('chat.tcmSyndrome')"
-                :span="2"
-              >
-                <el-tag type="success" effect="dark" size="small">
-                  {{ currentProfile.tcmSyndrome }}
-                </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item
-                v-if="currentProfile.mainComplaint"
-                :label="t('chat.chiefComplaint')"
-                :span="2"
-              >
-                {{ currentProfile.mainComplaint }}
-              </el-descriptions-item>
-            </el-descriptions>
-          </div>
-
-          <div v-else class="info-empty">
-            <el-empty :description="t('chat.fillInfo')">
-              <el-button type="primary" link @click="openInfoDialog">
-                {{ t("chat.fillInfo") }}
-              </el-button>
-            </el-empty>
-          </div>
-        </section>
 
         <div class="message-list" ref="messageListRef">
           <div
@@ -286,10 +163,10 @@
             :rows="4"
             :placeholder="t('chat.questionPlaceholder')"
             :disabled="!currentConversation?.is_active || isStreaming"
-            @keydown.enter.ctrl.prevent="sendMessage"
+            @keydown.enter.prevent="sendMessage"
           />
           <div class="input-actions">
-            <span class="tip">Ctrl + Enter {{ t("chat.send") }}</span>
+            <span class="tip">Enter {{ t("chat.send") }}</span>
             <div class="action-buttons">
               <el-button
                 text
@@ -433,7 +310,6 @@ import {
   ChatDotRound,
   Loading,
   EditPen,
-  Refresh,
 } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
@@ -745,19 +621,27 @@ const loadConversations = async () => {
 const loadMessages = async (conversationId: number) => {
   try {
     const res = await chatAPI.getMessages(conversationId);
-    messages.value = res.data;
+    // 确保只加载属于当前对话的消息
+    const loadedMessages = res.data.filter(
+      (msg: MessageItem) => msg.conversation_id === conversationId
+    );
+    messages.value = loadedMessages;
     await scrollToBottom();
     if (messages.value.length === 0 && hasPatientInfo.value) {
       shouldAttachUserInfo.value = true;
     }
   } catch (error) {
     console.error("Failed to load messages:", error);
+    // 加载失败时清空消息，避免显示错误数据
+    messages.value = [];
   }
 };
 
-const selectConversation = async (id: number) => {
-  if (currentConversationId.value === id) return;
+const selectConversation = async (id: number, forceReload = false) => {
+  if (currentConversationId.value === id && !forceReload) return;
   currentConversationId.value = id;
+  // 先清空消息，防止显示旧数据
+  messages.value = [];
   await loadMessages(id);
   // 加载推荐问题
   await loadSuggestedQuestions();
@@ -768,7 +652,8 @@ const createNewConversation = async (promptInfo = false) => {
     const defaultTitle = t("chat.newConversation");
     const res = await chatAPI.createConversation(defaultTitle);
     await loadConversations();
-    await selectConversation(res.data.id);
+    // 强制重新加载消息，确保不会显示旧数据
+    await selectConversation(res.data.id, true);
     if (promptInfo) {
       await nextTick();
       openInfoDialog();
@@ -810,11 +695,6 @@ const deleteConv = async (id: number) => {
       console.error("Failed to delete conversation:", error);
     }
   }
-};
-
-const refreshConversation = async () => {
-  if (!currentConversationId.value) return;
-  await loadMessages(currentConversationId.value);
 };
 
 const sendMessage = async () => {
@@ -1008,7 +888,8 @@ onUnmounted(() => {
 .chat-layout {
   display: grid;
   grid-template-columns: 300px 1fr;
-  height: 100vh;
+  flex: 1;
+  min-height: 0;
   background: linear-gradient(135deg, var(--color-bgSecondary) 0%, var(--color-bgPrimary) 50%);
   overflow: hidden;
 }
@@ -1109,38 +990,12 @@ onUnmounted(() => {
   margin-top: var(--spacing-sm);
 }
 
-.sidebar-footer {
-  padding: var(--spacing-lg);
-  border-top: 1px solid var(--color-borderPrimary);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.footer-switches {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  cursor: pointer;
-  color: var(--color-textPrimary);
-}
-
-.user-name {
-  font-weight: 500;
-}
-
 .main-content {
   position: relative;
   background: var(--color-bgPrimary);
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  flex: 1;
   min-height: 0;
 }
 
@@ -1221,64 +1076,6 @@ onUnmounted(() => {
   font-size: var(--font-size-2xl);
   color: var(--color-textPrimary);
   font-weight: 600;
-}
-
-.chat-actions {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-.patient-info-card {
-  padding: var(--spacing-xl) var(--spacing-2xl);
-  border-bottom: 2px solid var(--color-borderLight);
-  background: linear-gradient(to right, var(--color-bgSecondary), var(--color-bgPrimary));
-  flex-shrink: 0;
-  max-height: 300px;
-  overflow-y: auto;
-  position: relative;
-}
-
-.patient-info-card::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(to right, transparent, var(--color-borderPrimary), transparent);
-}
-
-.patient-info-card .card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--spacing-lg);
-}
-
-.card-header h3 {
-  margin: 0;
-  font-size: var(--font-size-lg);
-  color: var(--color-textPrimary);
-}
-
-.card-subtitle {
-  margin: var(--spacing-xs) 0 0;
-  color: var(--color-textSecondary);
-  font-size: var(--font-size-sm);
-}
-
-.info-body {
-  margin-top: var(--spacing-lg);
-}
-
-.info-empty {
-  margin-top: var(--spacing-lg);
-}
-
-.disease-tag,
-.symptom-tag-display {
-  margin-right: var(--spacing-xs);
-  margin-bottom: var(--spacing-xs);
 }
 
 .message-list {

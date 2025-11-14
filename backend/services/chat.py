@@ -139,14 +139,20 @@ def create_message(db: Session, conversation_id: int, role: str, content: str) -
 def delete_conversation(db: Session, conversation_id: int, user: User) -> None:
     """
     删除对话
-    
+
     Args:
         db: 数据库会话
         conversation_id: 对话 ID
         user: 用户对象
     """
     conversation = get_conversation_by_id(db, conversation_id, user)
-    
+
+    # 显式删除所有关联的消息（确保即使外键约束未生效也能正确删除）
+    db.query(Message)\
+        .filter(Message.conversation_id == conversation_id)\
+        .delete(synchronize_session=False)
+
+    # 删除对话
     db.delete(conversation)
     db.commit()
 

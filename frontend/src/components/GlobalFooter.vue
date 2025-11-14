@@ -42,7 +42,7 @@ onMounted(async () => {
 .footer-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: 0;
 }
 
 .footer-content {

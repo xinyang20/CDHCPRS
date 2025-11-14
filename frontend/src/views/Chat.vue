@@ -4,10 +4,6 @@
 
     <aside class="sidebar">
       <div class="sidebar-header">
-        <div class="brand">
-          <h2>{{ websiteName }}</h2>
-          <p class="brand-subtitle">{{ t("chat.sidebarTagline") }}</p>
-        </div>
         <el-button
           type="primary"
           @click="createNewConversation(true)"
@@ -15,6 +11,21 @@
         >
           {{ t("chat.newConversation") }}
         </el-button>
+        <el-dropdown trigger="hover" @command="handleGlobalAction">
+          <el-button circle :icon="MoreFilled" />
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="clear">
+                <el-icon><DeleteFilled /></el-icon>
+                清空对话
+              </el-dropdown-item>
+              <el-dropdown-item command="export">
+                <el-icon><Download /></el-icon>
+                导出全部对话
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
 
       <el-scrollbar class="conversation-scroll">
@@ -47,15 +58,25 @@
             }}</span>
           </div>
           <div class="conversation-actions" @click.stop>
-            <el-tooltip :content="t('common.actions.delete')" placement="top">
+            <el-dropdown trigger="hover" @command="(cmd) => handleConversationAction(cmd, conv.id)">
               <el-button
                 text
-                type="danger"
                 size="small"
-                :icon="Delete"
-                @click="deleteConv(conv.id)"
+                :icon="MoreFilled"
               />
-            </el-tooltip>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="delete">
+                    <el-icon><Delete /></el-icon>
+                    删除对话
+                  </el-dropdown-item>
+                  <el-dropdown-item command="export">
+                    <el-icon><Download /></el-icon>
+                    导出对话
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </div>
       </el-scrollbar>
@@ -310,6 +331,9 @@ import {
   ChatDotRound,
   Loading,
   EditPen,
+  MoreFilled,
+  Download,
+  DeleteFilled,
 } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
@@ -627,8 +651,14 @@ const loadMessages = async (conversationId: number) => {
     );
     messages.value = loadedMessages;
     await scrollToBottom();
-    if (messages.value.length === 0 && hasPatientInfo.value) {
-      shouldAttachUserInfo.value = true;
+    // 如果是首次打开对话（消息为空），自动弹出问诊档案填写
+    if (messages.value.length === 0) {
+      if (hasPatientInfo.value) {
+        shouldAttachUserInfo.value = true;
+      }
+      // 首次打开对话时，弹出问诊档案对话框
+      await nextTick();
+      openInfoDialog();
     }
   } catch (error) {
     console.error("Failed to load messages:", error);
@@ -693,6 +723,116 @@ const deleteConv = async (id: number) => {
   } catch (error) {
     if (error !== "cancel") {
       console.error("Failed to delete conversation:", error);
+    }
+  }
+};
+
+// 处理全局聚合按钮操作
+const handleGlobalAction = async (command: string) => {
+  if (command === "clear") {
+    // 清空所有对话
+    try {
+      await ElMessageBox.confirm(
+        "确定要清空所有对话吗？此操作不可恢复。",
+        t("messages.confirmTitle"),
+        {
+          confirmButtonText: t("common.actions.confirm"),
+          cancelButtonText: t("common.actions.cancel"),
+          type: "warning",
+        }
+      );
+
+      // 删除所有对话
+      const deletePromises = conversations.value.map((conv) =>
+        chatAPI.deleteConversation(conv.id)
+      );
+      await Promise.all(deletePromises);
+
+      // 重新加载对话列表
+      await loadConversations();
+      currentConversationId.value = null;
+      messages.value = [];
+      conversationProfiles.value = {};
+
+      ElMessage.success("已清空所有对话");
+    } catch (error) {
+      if (error !== "cancel") {
+        console.error("Failed to clear conversations:", error);
+        ElMessage.error("清空对话失败");
+      }
+    }
+  } else if (command === "export") {
+    // 导出所有对话
+    try {
+      const exportData = [];
+
+      for (const conv of conversations.value) {
+        const res = await chatAPI.getMessages(conv.id);
+        exportData.push({
+          id: conv.id,
+          title: conv.title,
+          created_at: conv.created_at,
+          messages: res.data,
+        });
+      }
+
+      // 创建并下载JSON文件
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `all-conversations-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      ElMessage.success("导出成功");
+    } catch (error) {
+      console.error("Failed to export conversations:", error);
+      ElMessage.error("导出失败");
+    }
+  }
+};
+
+// 处理单个对话的聚合按钮操作
+const handleConversationAction = async (command: string, conversationId: number) => {
+  if (command === "delete") {
+    // 删除对话
+    await deleteConv(conversationId);
+  } else if (command === "export") {
+    // 导出单个对话
+    try {
+      const conversation = conversations.value.find((c) => c.id === conversationId);
+      if (!conversation) return;
+
+      const res = await chatAPI.getMessages(conversationId);
+      const exportData = {
+        id: conversation.id,
+        title: conversation.title,
+        created_at: conversation.created_at,
+        messages: res.data,
+      };
+
+      // 创建并下载JSON文件
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `conversation-${conversationId}-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      ElMessage.success("导出成功");
+    } catch (error) {
+      console.error("Failed to export conversation:", error);
+      ElMessage.error("导出失败");
     }
   }
 };
@@ -906,8 +1046,10 @@ onUnmounted(() => {
   padding: var(--spacing-xl);
   border-bottom: 1px solid var(--color-borderPrimary);
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
 }
 
 .brand h2 {

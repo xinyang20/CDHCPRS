@@ -262,12 +262,9 @@ body {
   }
 }
 
-/* 大字版模式 - 使用transform缩放所有元素 */
+/* 大字版模式 - 使用zoom缩放所有元素 */
 html.large-font-mode body {
-  transform-origin: top center;
-  transform: scale(var(--large-font-scale, 1.5));
-  width: calc(100% / var(--large-font-scale, 1.5));
-  min-height: calc(100vh / var(--large-font-scale, 1.5));
+  zoom: var(--large-font-scale, 1.5);
 }
 
 html.large-font-mode {

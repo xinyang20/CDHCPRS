@@ -187,7 +187,7 @@
           <el-input
             v-model="inputMessage"
             type="textarea"
-            :rows="4"
+            :rows="1"
             :placeholder="t('chat.questionPlaceholder')"
             :disabled="!currentConversation?.is_active || isStreaming"
             @keydown.enter.prevent="sendMessage"
@@ -1273,7 +1273,7 @@ onUnmounted(() => {
 }
 
 .chat-header {
-  padding: var(--spacing-xl) var(--spacing-2xl) var(--spacing-lg);
+  padding: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;

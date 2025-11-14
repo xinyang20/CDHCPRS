@@ -3,38 +3,6 @@
     <BackendStatus />
 
     <div class="admin-layout">
-      <div class="admin-header-section">
-        <h2>{{ t("admin.title") }}</h2>
-        <p class="header-subtitle">{{ t("admin.subtitle") }}</p>
-      </div>
-
-      <el-tabs v-model="activeMenu" class="admin-tabs" @tab-click="handleTabClick">
-        <el-tab-pane name="users">
-          <template #label>
-            <span class="tab-label">
-              <el-icon><User /></el-icon>
-              {{ t("admin.menu.users") }}
-            </span>
-          </template>
-        </el-tab-pane>
-        <el-tab-pane name="conversations">
-          <template #label>
-            <span class="tab-label">
-              <el-icon><ChatDotRound /></el-icon>
-              {{ t("admin.menu.conversations") }}
-            </span>
-          </template>
-        </el-tab-pane>
-        <el-tab-pane name="settings">
-          <template #label>
-            <span class="tab-label">
-              <el-icon><Setting /></el-icon>
-              {{ t("admin.menu.settings") }}
-            </span>
-          </template>
-        </el-tab-pane>
-      </el-tabs>
-
       <div class="admin-main">
           <section v-if="activeMenu === 'users'" class="panel">
             <header class="panel-header">
@@ -628,7 +596,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import {
   ChatDotRound,
   Link,
@@ -663,10 +631,22 @@ import {
 import { useUserStore } from "../stores/user";
 
 const router = useRouter();
+const route = useRoute();
 const { t, locale } = useI18n();
 const userStore = useUserStore();
 
 const activeMenu = ref<"users" | "conversations" | "settings">("users");
+
+// 监听路由query变化，切换tab
+watch(
+  () => route.query.tab,
+  (newTab) => {
+    if (newTab && ['users', 'conversations', 'settings'].includes(newTab as string)) {
+      activeMenu.value = newTab as typeof activeMenu.value;
+    }
+  },
+  { immediate: true }
+);
 const loadingUsers = ref(false);
 const loadingConversations = ref(false);
 const savingSettings = ref(false);
@@ -850,14 +830,6 @@ watch(locale, () => {
 const formatDate = (value?: string) => {
   if (!value) return "";
   return new Date(value).toLocaleString(locale.value, { hour12: false });
-};
-
-const handleMenuSelect = (key: string) => {
-  activeMenu.value = key as typeof activeMenu.value;
-};
-
-const handleTabClick = () => {
-  // Tab切换由v-model自动处理
 };
 
 const loadUsers = async () => {
@@ -1155,6 +1127,12 @@ onMounted(async () => {
     return;
   }
 
+  // 从 query 参数获取要显示的 tab
+  const tabQuery = router.currentRoute.value.query.tab as string;
+  if (tabQuery && ['users', 'conversations', 'settings'].includes(tabQuery)) {
+    activeMenu.value = tabQuery as typeof activeMenu.value;
+  }
+
   await Promise.all([loadUsers(), loadConversations(), loadSettings()]);
 });
 </script>
@@ -1173,37 +1151,6 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.admin-header-section {
-  background: var(--color-bgPrimary);
-  padding: var(--spacing-xl) var(--spacing-2xl);
-  border-bottom: 1px solid var(--color-borderLight);
-  flex-shrink: 0;
-}
-
-.admin-header-section h2 {
-  margin: 0;
-  color: var(--color-primaryDark);
-  font-size: var(--font-size-3xl);
-  font-weight: 700;
-}
-
-.header-subtitle {
-  margin: var(--spacing-xs) 0 0;
-  color: var(--color-textSecondary);
-}
-
-.admin-tabs {
-  flex-shrink: 0;
-  padding: 0 var(--spacing-2xl);
-  background: var(--color-bgPrimary);
-}
-
-.tab-label {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
 }
 
 .admin-main {

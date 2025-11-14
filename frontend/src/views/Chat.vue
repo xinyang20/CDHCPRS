@@ -1,9 +1,17 @@
 <template>
-  <div class="chat-layout">
+  <div class="chat-layout" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
     <BackendStatus />
 
-    <aside class="sidebar">
-      <div class="sidebar-header">
+    <aside class="sidebar" :class="{ 'collapsed': sidebarCollapsed }">
+      <el-button
+        class="sidebar-toggle"
+        :icon="sidebarCollapsed ? ArrowRight : ArrowLeft"
+        @click="toggleSidebar"
+        circle
+        size="small"
+      />
+
+      <div class="sidebar-header" v-show="!sidebarCollapsed">
         <el-button
           type="primary"
           @click="createNewConversation(true)"
@@ -28,7 +36,7 @@
         </el-dropdown>
       </div>
 
-      <el-scrollbar class="conversation-scroll">
+      <el-scrollbar class="conversation-scroll" v-show="!sidebarCollapsed">
         <div
           v-for="conv in conversations"
           :key="conv.id"
@@ -41,24 +49,22 @@
           ]"
           @click="selectConversation(conv.id)"
         >
-          <div class="conversation-meta">
-            <div class="conversation-title">
-              <el-icon><ChatDotRound /></el-icon>
-              <span class="title-text">{{ conv.title }}</span>
-              <el-tag
-                v-if="!conv.is_active"
-                size="small"
-                type="warning"
-                effect="plain"
-                >{{ t("common.status.disabled") }}</el-tag
-              >
-            </div>
+          <div class="conversation-main">
+            <span class="title-text">{{ conv.title }}</span>
+            <el-tag
+              v-if="!conv.is_active"
+              size="small"
+              type="warning"
+              effect="plain"
+              class="status-tag"
+              >{{ t("common.status.disabled") }}</el-tag
+            >
             <span class="conversation-time">{{
-              formatDate(conv.created_at)
+              formatRelativeTime(conv.created_at)
             }}</span>
           </div>
           <div class="conversation-actions" @click.stop>
-            <el-dropdown trigger="hover" @command="(cmd) => handleConversationAction(cmd, conv.id)">
+            <el-dropdown trigger="hover" @command="(cmd) => handleConversationAction(cmd, conv.id)" placement="bottom-end">
               <el-button
                 text
                 size="small"
@@ -181,7 +187,7 @@
           <el-input
             v-model="inputMessage"
             type="textarea"
-            :rows="4"
+            :rows="1"
             :placeholder="t('chat.questionPlaceholder')"
             :disabled="!currentConversation?.is_active || isStreaming"
             @keydown.enter.prevent="sendMessage"
@@ -217,8 +223,11 @@
     <el-dialog
       v-model="infoDialogVisible"
       :title="t('chat.infoDialogTitle')"
-      width="520px"
+      width="75%"
+      top="12.5vh"
       destroy-on-close
+      :lock-scroll="true"
+      class="info-dialog"
     >
       <el-form
         ref="infoFormRef"
@@ -226,20 +235,26 @@
         :rules="infoRules"
         label-width="90px"
       >
-        <el-form-item :label="t('chat.age')" prop="age">
-          <el-input
-            v-model="infoForm.age"
-            :placeholder="t('chat.age')"
-            maxlength="3"
-          />
-        </el-form-item>
-        <el-form-item :label="t('chat.gender')" prop="gender">
-          <el-radio-group v-model="infoForm.gender">
-            <el-radio label="male">{{ t("chat.genderMale") }}</el-radio>
-            <el-radio label="female">{{ t("chat.genderFemale") }}</el-radio>
-            <el-radio label="other">{{ t("chat.genderOther") }}</el-radio>
-          </el-radio-group>
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item :label="t('chat.age')" prop="age">
+              <el-input
+                v-model="infoForm.age"
+                :placeholder="t('chat.age')"
+                maxlength="3"
+                style="width: 120px;"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="16">
+            <el-form-item :label="t('chat.gender')" prop="gender">
+              <el-radio-group v-model="infoForm.gender">
+                <el-radio label="male">{{ t("chat.genderMale") }}</el-radio>
+                <el-radio label="female">{{ t("chat.genderFemale") }}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
         <el-form-item :label="t('chat.diseaseHistory')" prop="diseases">
           <el-checkbox-group v-model="infoForm.diseases" class="disease-checkboxes">
@@ -334,6 +349,8 @@ import {
   MoreFilled,
   Download,
   DeleteFilled,
+  ArrowLeft,
+  ArrowRight,
 } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import type { FormInstance, FormRules } from "element-plus";
@@ -487,6 +504,12 @@ watch(
   { deep: true }
 );
 
+const sidebarCollapsed = ref(false);
+
+const toggleSidebar = () => {
+  sidebarCollapsed.value = !sidebarCollapsed.value;
+};
+
 const genderLabel = (gender: string) => {
   if (gender === "male") return t("chat.genderMale");
   if (gender === "female") return t("chat.genderFemale");
@@ -499,6 +522,32 @@ const formatDate = (value?: string) => {
   return new Date(value).toLocaleString(locale.value, {
     hour12: false,
   });
+};
+
+const formatRelativeTime = (value?: string) => {
+  if (!value) return "";
+  const now = new Date();
+  const date = new Date(value);
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) {
+    return "刚刚";
+  } else if (diffMins < 60) {
+    return `${diffMins}分钟前`;
+  } else if (diffHours < 24) {
+    return `${diffHours}小时前`;
+  } else if (diffDays <= 7) {
+    return `${diffDays}天前`;
+  } else {
+    return date.toLocaleDateString(locale.value, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  }
 };
 
 const scrollToBottom = async () => {
@@ -1032,6 +1081,11 @@ onUnmounted(() => {
   min-height: 0;
   background: linear-gradient(135deg, var(--color-bgSecondary) 0%, var(--color-bgPrimary) 50%);
   overflow: hidden;
+  transition: grid-template-columns 0.3s ease;
+}
+
+.chat-layout.sidebar-collapsed {
+  grid-template-columns: 50px 1fr;
 }
 
 .sidebar {
@@ -1040,6 +1094,21 @@ onUnmounted(() => {
   background: var(--color-bgSecondary);
   border-right: 2px solid var(--color-borderPrimary);
   box-shadow: 2px 0 8px rgba(139, 115, 85, 0.1);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 50px;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  transform: translateY(-50%);
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .sidebar-header {
@@ -1075,6 +1144,10 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all var(--transition-base);
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
 }
 
 .conversation-item:hover {
@@ -1100,36 +1173,38 @@ onUnmounted(() => {
   opacity: 0.65;
 }
 
-.conversation-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.conversation-title {
+.conversation-main {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  max-width: 200px;
+  min-width: 0;
 }
 
 .title-text {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.status-tag {
+  flex-shrink: 0;
 }
 
 .conversation-time {
   font-size: var(--font-size-xs);
   color: var(--color-textTertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .conversation-actions {
   display: flex;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-sm);
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
 }
 
 .main-content {
@@ -1198,7 +1273,7 @@ onUnmounted(() => {
 }
 
 .chat-header {
-  padding: var(--spacing-xl) var(--spacing-2xl) var(--spacing-lg);
+  padding: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1414,6 +1489,28 @@ onUnmounted(() => {
 
 .symptom-tag:active {
   transform: translateY(0);
+}
+
+/* 问诊档案弹窗样式 */
+:deep(.info-dialog.el-dialog) {
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.info-dialog .el-dialog__header) {
+  flex-shrink: 0;
+}
+
+:deep(.info-dialog .el-dialog__body) {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: none;
+}
+
+:deep(.info-dialog .el-dialog__footer) {
+  flex-shrink: 0;
 }
 
 @keyframes rotate {

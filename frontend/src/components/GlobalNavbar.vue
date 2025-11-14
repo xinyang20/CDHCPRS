@@ -19,9 +19,28 @@
         <router-link v-if="userStore.isAuthenticated()" to="/chat" class="nav-link">
           {{ t('chat.title') }}
         </router-link>
-        <router-link v-if="userStore.isAdmin()" to="/admin" class="nav-link">
-          {{ t('chat.userMenu.admin') }}
-        </router-link>
+        <el-dropdown v-if="userStore.isAdmin()" trigger="hover" @command="handleAdminCommand" class="admin-dropdown">
+          <span class="nav-link admin-link">
+            {{ t('chat.userMenu.admin') }}
+            <el-icon class="el-icon--right"><arrow-down /></el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="users">
+                <el-icon><User /></el-icon>
+                {{ t('admin.menu.users') }}
+              </el-dropdown-item>
+              <el-dropdown-item command="conversations">
+                <el-icon><ChatDotRound /></el-icon>
+                {{ t('admin.menu.conversations') }}
+              </el-dropdown-item>
+              <el-dropdown-item command="settings">
+                <el-icon><Setting /></el-icon>
+                {{ t('admin.menu.settings') }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </nav>
 
       <div class="navbar-right">
@@ -63,7 +82,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessageBox } from 'element-plus'
-import { SwitchButton } from '@element-plus/icons-vue'
+import { SwitchButton, ArrowDown, User, ChatDotRound, Setting } from '@element-plus/icons-vue'
 import { useUserStore } from '../stores/user'
 import LargeFontModeSwitcher from './LargeFontModeSwitcher.vue'
 import LanguageSwitcher from './LanguageSwitcher.vue'
@@ -75,6 +94,10 @@ const userStore = useUserStore()
 
 const websiteName = ref('')
 const websiteLogo = ref('')
+
+const handleAdminCommand = (command: string) => {
+  router.push({ path: '/admin', query: { tab: command } })
+}
 
 const handleCommand = async (command: string) => {
   if (command === 'logout') {
@@ -227,6 +250,18 @@ onMounted(async () => {
   color: var(--color-textSecondary);
   font-size: var(--font-size-sm);
   margin-top: var(--spacing-xs);
+}
+
+.admin-dropdown {
+  display: inline-flex;
+  align-items: center;
+}
+
+.admin-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {

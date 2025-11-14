@@ -51,17 +51,19 @@ const handleQuestionClick = (question: string) => {
 }
 
 .question-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primaryLight) 100%);
+  border: 1px solid var(--color-primaryDark);
   border-radius: 8px;
   padding: 12px 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 2px 8px rgba(139, 115, 85, 0.2);
 }
 
 .question-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.35);
+  background: linear-gradient(135deg, var(--color-primaryDark) 0%, var(--color-primary) 100%);
 }
 
 .question-card:active {

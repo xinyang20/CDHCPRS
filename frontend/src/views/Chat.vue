@@ -235,20 +235,26 @@
         :rules="infoRules"
         label-width="90px"
       >
-        <el-form-item :label="t('chat.age')" prop="age">
-          <el-input
-            v-model="infoForm.age"
-            :placeholder="t('chat.age')"
-            maxlength="3"
-          />
-        </el-form-item>
-        <el-form-item :label="t('chat.gender')" prop="gender">
-          <el-radio-group v-model="infoForm.gender">
-            <el-radio label="male">{{ t("chat.genderMale") }}</el-radio>
-            <el-radio label="female">{{ t("chat.genderFemale") }}</el-radio>
-            <el-radio label="other">{{ t("chat.genderOther") }}</el-radio>
-          </el-radio-group>
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item :label="t('chat.age')" prop="age">
+              <el-input
+                v-model="infoForm.age"
+                :placeholder="t('chat.age')"
+                maxlength="3"
+                style="width: 120px;"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="16">
+            <el-form-item :label="t('chat.gender')" prop="gender">
+              <el-radio-group v-model="infoForm.gender">
+                <el-radio label="male">{{ t("chat.genderMale") }}</el-radio>
+                <el-radio label="female">{{ t("chat.genderFemale") }}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
         <el-form-item :label="t('chat.diseaseHistory')" prop="diseases">
           <el-checkbox-group v-model="infoForm.diseases" class="disease-checkboxes">
@@ -1486,14 +1492,25 @@ onUnmounted(() => {
 }
 
 /* 问诊档案弹窗样式 */
-:deep(.info-dialog) {
+:deep(.info-dialog.el-dialog) {
   max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.info-dialog .el-dialog__header) {
+  flex-shrink: 0;
 }
 
 :deep(.info-dialog .el-dialog__body) {
-  max-height: calc(75vh - 120px);
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  max-height: none;
+}
+
+:deep(.info-dialog .el-dialog__footer) {
+  flex-shrink: 0;
 }
 
 @keyframes rotate {

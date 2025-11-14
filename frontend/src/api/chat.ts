@@ -33,4 +33,8 @@ export const chatAPI = {
   deleteConversation: (id: number) => {
     return api.delete(`/api/chat/conversations/${id}`)
   },
+
+  getSuggestedQuestions: (conversationId: number) => {
+    return api.get(`/api/chat/conversations/${conversationId}/suggested-questions`)
+  },
 }

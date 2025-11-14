@@ -3,6 +3,8 @@
 """
 from __future__ import annotations
 
+import json
+import re
 from dataclasses import dataclass
 from typing import AsyncGenerator, Dict, List, Optional, Tuple
 
@@ -183,3 +185,115 @@ async def list_llm_models(
         return True, models, None
     except Exception as exc:  # noqa: BLE001
         return False, [], f"获取模型列表失败: {exc}"
+
+
+async def generate_suggested_questions(
+    provider: str,
+    api_key: str,
+    model: str,
+    system_prompt: str,
+    messages: List[Dict[str, str]],
+    count: int = 3,
+    base_url: Optional[str] = None,
+    max_retries: int = 1,
+) -> Tuple[bool, List[str], Optional[str]]:
+    """
+    生成推荐问题
+
+    Args:
+        provider: LLM 提供商
+        api_key: API 密钥
+        model: 模型名称
+        system_prompt: 系统提示词
+        messages: 历史消息列表
+        count: 需要生成的问题数量
+        base_url: API Base URL
+        max_retries: 最大重试次数（默认1次）
+
+    Returns:
+        Tuple[是否成功, 问题列表, 错误消息]
+    """
+
+    def extract_questions(text: str, expected_count: int) -> Optional[List[str]]:
+        """从大模型返回的文本中提取问题列表"""
+
+        # 尝试解析 JSON 格式
+        try:
+            # 查找 JSON 数组
+            json_match = re.search(r'\[[\s\S]*?\]', text)
+            if json_match:
+                questions = json.loads(json_match.group())
+                if isinstance(questions, list) and all(isinstance(q, str) for q in questions):
+                    return questions[:expected_count]
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+        # 尝试解析编号列表格式（如：1. 问题1\n2. 问题2）
+        numbered_pattern = r'^\s*\d+[.、]\s*(.+)$'
+        numbered_questions = []
+        for line in text.split('\n'):
+            match = re.match(numbered_pattern, line.strip())
+            if match:
+                numbered_questions.append(match.group(1).strip())
+
+        if len(numbered_questions) >= expected_count:
+            return numbered_questions[:expected_count]
+
+        # 尝试解析无序列表格式（如：- 问题1\n- 问题2）
+        bullet_pattern = r'^\s*[-*•]\s*(.+)$'
+        bullet_questions = []
+        for line in text.split('\n'):
+            match = re.match(bullet_pattern, line.strip())
+            if match:
+                bullet_questions.append(match.group(1).strip())
+
+        if len(bullet_questions) >= expected_count:
+            return bullet_questions[:expected_count]
+
+        # 如果都无法解析，返回 None
+        return None
+
+    for attempt in range(max_retries + 1):
+        try:
+            client = _create_async_client(provider, api_key, base_url)
+        except LLMServiceError as exc:
+            return False, [], str(exc)
+
+        try:
+            # 构建完整的消息列表
+            full_messages = [{"role": "system", "content": system_prompt}]
+            full_messages.extend(messages)
+
+            # 调用大模型
+            response = await client.chat.completions.create(
+                model=model,
+                messages=full_messages,
+                temperature=0.8,
+                max_tokens=500,
+            )
+
+            if not response.choices or not response.choices[0].message.content:
+                if attempt < max_retries:
+                    continue
+                return False, [], "大模型未返回有效内容"
+
+            content = response.choices[0].message.content.strip()
+
+            # 提取问题
+            questions = extract_questions(content, count)
+
+            if questions:
+                return True, questions, None
+
+            # 如果提取失败且还有重试机会，继续重试
+            if attempt < max_retries:
+                continue
+
+            return False, [], f"无法从大模型返回中提取推荐问题，原始返回：{content[:200]}"
+
+        except Exception as exc:  # noqa: BLE001
+            if attempt < max_retries:
+                continue
+            return False, [], f"调用大模型失败: {exc}"
+
+    return False, [], "生成推荐问题失败"

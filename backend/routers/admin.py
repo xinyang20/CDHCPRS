@@ -200,6 +200,15 @@ def get_settings(
         llm_api_key=settings.get("llm_api_key", ""),
         llm_model_id=settings.get("llm_model_id", ""),
         large_font_scale=float(settings.get("large_font_scale", "1.5")),
+        suggested_questions_enabled=settings.get("suggested_questions_enabled", "false"),
+        suggested_questions_provider=settings.get("suggested_questions_provider", ""),
+        suggested_questions_base_url=settings.get("suggested_questions_base_url", ""),
+        suggested_questions_api_key=settings.get("suggested_questions_api_key", ""),
+        suggested_questions_model_id=settings.get("suggested_questions_model_id", ""),
+        suggested_questions_system_prompt=settings.get("suggested_questions_system_prompt", ""),
+        suggested_questions_count=settings.get("suggested_questions_count", "3"),
+        suggested_questions_max_rounds=settings.get("suggested_questions_max_rounds", "5"),
+        suggested_questions_template_questions=settings.get("suggested_questions_template_questions", "[]"),
     )
 
 
@@ -240,6 +249,15 @@ def update_settings(
         llm_api_key=all_settings.get("llm_api_key", ""),
         llm_model_id=all_settings.get("llm_model_id", ""),
         large_font_scale=float(all_settings.get("large_font_scale", "1.5")),
+        suggested_questions_enabled=all_settings.get("suggested_questions_enabled", "false"),
+        suggested_questions_provider=all_settings.get("suggested_questions_provider", ""),
+        suggested_questions_base_url=all_settings.get("suggested_questions_base_url", ""),
+        suggested_questions_api_key=all_settings.get("suggested_questions_api_key", ""),
+        suggested_questions_model_id=all_settings.get("suggested_questions_model_id", ""),
+        suggested_questions_system_prompt=all_settings.get("suggested_questions_system_prompt", ""),
+        suggested_questions_count=all_settings.get("suggested_questions_count", "3"),
+        suggested_questions_max_rounds=all_settings.get("suggested_questions_max_rounds", "5"),
+        suggested_questions_template_questions=all_settings.get("suggested_questions_template_questions", "[]"),
     )
 
 
